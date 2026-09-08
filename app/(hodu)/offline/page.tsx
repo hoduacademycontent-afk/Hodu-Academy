@@ -153,11 +153,6 @@ const offlinePrograms = [
   }
 ]
 
-const timetableSlots = [
-  { batch: 'Morning Intensive Batch', time: '8:00 AM – 1:30 PM', audience: 'Droppers / Integrated College', focus: 'Daily 4 Lecture Hours + 1.5 Hr Supervised Practice' },
-  { batch: 'Evening Foundation & Board', time: '3:30 PM – 7:30 PM', audience: 'Classes 8–12 School Students', focus: 'Daily 3 Lectures + 1 Hr Doubt Desk' },
-  { batch: 'Weekend Masterclass', time: 'Sat & Sun (9:00 AM – 4:00 PM)', audience: 'Outstation & Boarding Students', focus: 'Deep Dive Modules + Full Mock Exam' },
-]
 
 export default async function OfflinePage() {
   const supabase = await createClient()
@@ -548,44 +543,6 @@ export default async function OfflinePage() {
         </div>
       </section>
 
-      {/* Daily Schedule & Timetable Slots */}
-      <section className="py-16 sm:py-20 bg-brand-bg border-t border-brand-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal animation="fade-up">
-            <div className="text-center mb-12 sm:mb-16">
-              <span className="inline-block bg-brand-maroon text-white text-xs font-bold uppercase tracking-widest px-3.5 py-1.5 rounded-full mb-3">
-                TIMETABLE
-              </span>
-              <h2 className="font-serif-editorial text-3xl sm:text-4xl lg:text-5xl font-bold text-brand-maroon tracking-tight">
-                Daily Batch Schedules
-              </h2>
-              <p className="text-sm text-brand-muted mt-2 max-w-xl mx-auto leading-relaxed">
-                Structured timetable designed to balance deep concept lectures with supervised problem solving.
-              </p>
-            </div>
-          </ScrollReveal>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {timetableSlots.map((slot, idx) => (
-              <ScrollReveal key={slot.batch} animation="fade-up" delay={idx * 80}>
-                <div className="bg-white border border-brand-border rounded-2xl p-6 shadow-xs hover:border-brand-maroon/40 transition-all flex flex-col justify-between h-full">
-                  <div>
-                    <div className="flex items-center gap-2 text-brand-maroon mb-2">
-                      <Clock size={16} />
-                      <span className="text-xs font-bold uppercase tracking-wider">{slot.time}</span>
-                    </div>
-                    <h3 className="font-bold text-brand-text text-base">{slot.batch}</h3>
-                    <p className="text-xs text-brand-crimson font-medium mt-1">{slot.audience}</p>
-                    <p className="text-xs text-brand-muted mt-3 leading-relaxed border-t border-brand-border/60 pt-3">
-                      {slot.focus}
-                    </p>
-                  </div>
-                </div>
-              </ScrollReveal>
-            ))}
-          </div>
-        </div>
-      </section>
 
     </div>
   )
