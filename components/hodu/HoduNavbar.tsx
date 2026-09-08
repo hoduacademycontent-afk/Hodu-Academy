@@ -239,11 +239,11 @@ export default function HoduNavbar({
             </div>
           </Link>
 
-          {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center gap-3.5 xl:gap-6 2xl:gap-8 flex-1 whitespace-nowrap">
+          {/* Desktop Nav - Centered */}
+          <nav className="hidden lg:flex items-center justify-center gap-4 xl:gap-7 2xl:gap-9 flex-1 whitespace-nowrap px-4">
             <Link
               href="/"
-              className={`text-xs xl:text-sm font-bold transition-colors ${
+              className={`text-[13.5px] xl:text-[15px] font-bold transition-colors ${
                 pathname === '/' ? 'text-[#7A001F] font-black' : 'text-neutral-800 hover:text-[#7A001F]'
               }`}
             >
@@ -252,7 +252,7 @@ export default function HoduNavbar({
 
             <Link
               href="/offline"
-              className={`text-xs xl:text-sm font-bold transition-colors ${
+              className={`text-[13.5px] xl:text-[15px] font-bold transition-colors ${
                 pathname === '/offline' ? 'text-[#7A001F] font-black' : 'text-neutral-800 hover:text-[#7A001F]'
               }`}
             >
@@ -269,7 +269,7 @@ export default function HoduNavbar({
               <button
                 type="button"
                 onClick={() => setHubOpen((prev) => !prev)}
-                className={`flex items-center gap-1.5 text-xs xl:text-sm font-bold transition-colors ${
+                className={`flex items-center gap-1.5 text-[13.5px] xl:text-[15px] font-bold transition-colors cursor-pointer ${
                   isLearnersHubActive || hubOpen
                     ? 'text-[#7A001F] font-black'
                     : 'text-neutral-800 hover:text-[#7A001F]'
@@ -278,7 +278,7 @@ export default function HoduNavbar({
               >
                 <span>Learner&apos;s Hub</span>
                 <ChevronDown
-                  className={`h-3.5 w-3.5 transition-transform duration-200 ${
+                  className={`h-4 w-4 transition-transform duration-200 ${
                     hubOpen ? 'rotate-180 text-[#7A001F]' : 'text-neutral-500'
                   }`}
                 />
@@ -353,7 +353,7 @@ export default function HoduNavbar({
 
             <Link
               href="/about"
-              className={`text-xs xl:text-sm font-bold transition-colors ${
+              className={`text-[13.5px] xl:text-[15px] font-bold transition-colors ${
                 pathname === '/about' ? 'text-[#7A001F] font-black' : 'text-neutral-800 hover:text-[#7A001F]'
               }`}
             >
@@ -362,7 +362,7 @@ export default function HoduNavbar({
 
             <Link
               href="/blog"
-              className={`text-xs xl:text-sm font-bold transition-colors ${
+              className={`text-[13.5px] xl:text-[15px] font-bold transition-colors ${
                 pathname === '/blog' || pathname.startsWith('/blog/') ? 'text-[#7A001F] font-black' : 'text-neutral-800 hover:text-[#7A001F]'
               }`}
             >
@@ -371,7 +371,7 @@ export default function HoduNavbar({
 
             <Link
               href="/contact"
-              className={`text-xs xl:text-sm font-bold transition-colors ${
+              className={`text-[13.5px] xl:text-[15px] font-bold transition-colors ${
                 pathname === '/contact' ? 'text-[#7A001F] font-black' : 'text-neutral-800 hover:text-[#7A001F]'
               }`}
             >
