@@ -49,7 +49,7 @@ export default function FeatureCardsCarousel({ features }: FeatureCardsCarouselP
         onClick={() => scroll('left')}
         disabled={!canScrollLeft}
         aria-label="Previous features"
-        className={`hidden sm:flex absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/95 backdrop-blur-md shadow-xl border border-neutral-200/90 text-brand-maroon items-center justify-center transition-all duration-300 hover:bg-brand-maroon hover:text-white hover:scale-105 active:scale-95 disabled:opacity-0 disabled:pointer-events-none ${
+        className={`flex absolute -left-2 sm:-left-4 lg:-left-5 top-1/2 -translate-y-1/2 z-30 w-9 h-9 sm:w-11 sm:h-11 lg:w-12 lg:h-12 rounded-full bg-white/95 backdrop-blur-md shadow-xl border-2 border-brand-border/80 text-brand-maroon items-center justify-center transition-all duration-300 hover:bg-brand-maroon hover:text-white hover:border-brand-maroon hover:scale-105 active:scale-95 disabled:opacity-0 disabled:pointer-events-none cursor-pointer ${
           canScrollLeft ? 'opacity-100' : 'opacity-0'
         }`}
       >
@@ -61,7 +61,7 @@ export default function FeatureCardsCarousel({ features }: FeatureCardsCarouselP
         onClick={() => scroll('right')}
         disabled={!canScrollRight}
         aria-label="Next features"
-        className={`hidden sm:flex absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/95 backdrop-blur-md shadow-xl border border-neutral-200/90 text-brand-maroon items-center justify-center transition-all duration-300 hover:bg-brand-maroon hover:text-white hover:scale-105 active:scale-95 disabled:opacity-0 disabled:pointer-events-none ${
+        className={`flex absolute -right-2 sm:-right-4 lg:-right-5 top-1/2 -translate-y-1/2 z-30 w-9 h-9 sm:w-11 sm:h-11 lg:w-12 lg:h-12 rounded-full bg-white/95 backdrop-blur-md shadow-xl border-2 border-brand-border/80 text-brand-maroon items-center justify-center transition-all duration-300 hover:bg-brand-maroon hover:text-white hover:border-brand-maroon hover:scale-105 active:scale-95 disabled:opacity-0 disabled:pointer-events-none cursor-pointer ${
           canScrollRight ? 'opacity-100' : 'opacity-0'
         }`}
       >
@@ -71,7 +71,8 @@ export default function FeatureCardsCarousel({ features }: FeatureCardsCarouselP
       {/* Horizontal Scrollable Container (snaps on mobile, 4 columns on desktop) */}
       <div
         ref={containerRef}
-        className="flex lg:grid lg:grid-cols-4 gap-5 sm:gap-6 lg:gap-7 overflow-x-auto lg:overflow-visible scroll-smooth snap-x snap-mandatory py-4 px-1 -mx-1 no-scrollbar"
+        data-lenis-prevent
+        className="flex lg:grid lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-7 overflow-x-auto lg:overflow-visible scroll-smooth snap-x snap-mandatory py-4 px-2 sm:px-1 no-scrollbar overscroll-contain"
         style={{
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
@@ -81,7 +82,7 @@ export default function FeatureCardsCarousel({ features }: FeatureCardsCarouselP
         {features.map((feature, idx) => (
           <div
             key={idx}
-            className="w-[82vw] sm:w-[320px] md:w-[340px] lg:w-full shrink-0 snap-start h-full"
+            className="w-[72vw] max-w-[280px] sm:w-[280px] md:w-[320px] lg:w-full shrink-0 snap-center h-auto flex items-center justify-center"
           >
             <FeatureBookCard feature={feature} index={idx} />
           </div>
