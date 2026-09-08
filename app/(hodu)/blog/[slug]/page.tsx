@@ -7,6 +7,7 @@ import { HODU_SITE_ID } from '@/lib/hodu'
 import { FALLBACK_BLOGS } from '@/lib/blogFallbacks'
 import type { Metadata } from 'next'
 import BannerElasticMesh from '@/components/ui/BannerElasticMesh'
+import { SITE_URL, getBlogPostingSchema, getBreadcrumbSchema } from '@/lib/seo'
 
 const legacyIdToSlug: Record<string, string> = {
   '14': 'viteee-2026-application-form-updates',
@@ -34,32 +35,53 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params
   const targetSlug = legacyIdToSlug[slug] || slug
 
+  let postTitle = 'Site blog | Hodu Academy'
+  let postDesc = 'Academic insights, exam patterns, and syllabus updates from Hodu Academy mentors.'
+  let postCover = '/images/jaipur_center_bg.png'
+
   try {
     const supabase = await createClient()
     const { data: dbPost } = await supabase
       .from('cms_blogs')
-      .select('title, excerpt')
+      .select('title, excerpt, cover_image')
       .eq('site_id', HODU_SITE_ID)
       .eq('slug', targetSlug)
       .maybeSingle()
 
     if (dbPost) {
-      return {
-        title: `${dbPost.title} | Hodu Academy`,
-        description: dbPost.excerpt || dbPost.title,
+      postTitle = `${dbPost.title} | Hodu Academy`
+      postDesc = dbPost.excerpt || dbPost.title
+      if (dbPost.cover_image) postCover = dbPost.cover_image
+    } else {
+      const fallback = FALLBACK_BLOGS[targetSlug]
+      if (fallback) {
+        postTitle = `${fallback.title} | Hodu Academy`
+        postDesc = fallback.excerpt || fallback.title
+        if (fallback.cover_image) postCover = fallback.cover_image
       }
     }
   } catch {}
 
-  const fallback = FALLBACK_BLOGS[targetSlug]
-  if (fallback) {
-    return {
-      title: `${fallback.title} | Hodu Academy`,
-      description: fallback.excerpt || fallback.title,
-    }
+  return {
+    title: postTitle,
+    description: postDesc,
+    alternates: {
+      canonical: `/blog/${targetSlug}`,
+    },
+    openGraph: {
+      title: postTitle,
+      description: postDesc,
+      url: `${SITE_URL}/blog/${targetSlug}`,
+      type: 'article',
+      images: [{ url: postCover, width: 1200, height: 630, alt: postTitle }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: postTitle,
+      description: postDesc,
+      images: [postCover],
+    },
   }
-
-  return { title: 'Site blog | Hodu Academy' }
 }
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -151,8 +173,35 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       }))
   }
 
+  const blogSchema = getBlogPostingSchema({
+    title: post.title,
+    slug: slug,
+    date: post.date,
+    created_at: activePost.created_at,
+    updated_at: activePost.updated_at,
+    author: post.author,
+    cover_image: post.cover_image,
+    excerpt: post.excerpt,
+    category: post.category,
+  })
+
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: 'Home', url: '/' },
+    { name: 'Blog', url: '/blog' },
+    { name: post.title, url: `/blog/${slug}` },
+  ])
+
   return (
     <div className="min-h-screen bg-white">
+      {/* Schema.org Structured Data for BlogPosting and Breadcrumbs */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       {/* Top Header Banner */}
       <section className="bg-[#7E0D0D] text-white py-12 sm:py-16 shadow-inner relative overflow-hidden">
         <BannerElasticMesh variant="crimson" opacity={0.85} interaction="hover" />

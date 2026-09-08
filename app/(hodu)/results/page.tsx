@@ -1,3 +1,4 @@
+import { SITE_URL, getBreadcrumbSchema } from '@/lib/seo'
 import { HODU, HODU_SITE_ID } from '@/lib/hodu'
 import { createClient } from '@/lib/supabase/server'
 import { Trophy, ShieldCheck, Award, Star, GraduationCap } from 'lucide-react'
@@ -8,8 +9,17 @@ import BannerElasticMesh from '@/components/ui/BannerElasticMesh'
 export const dynamic = 'force-dynamic'
 
 export const metadata = {
-  title: 'Results & Top Rankers — Hodu Academy | Hall of Fame',
-  description: 'Discover the exceptional achievements of Hodu Academy students across Cambridge IGCSE, IB Diploma, CBSE Class 10 & 12, IIT-JEE, and NEET.',
+  title: 'Academic Excellence & Verified Achievers 2026 — Hodu Academy',
+  description: 'Explore verified student results and city toppers in Cambridge IGCSE, IB DP, CBSE 10th & 12th, IIT-JEE, NEET, and Olympiads at Hodu Academy.',
+  alternates: {
+    canonical: '/results',
+  },
+  openGraph: {
+    title: 'Academic Excellence & Verified Achievers 2026 — Hodu Academy',
+    description: 'Celebrating high percentiles, AIR rankers, and 8x A* world achievers at Hodu Academy.',
+    url: `${SITE_URL}/results`,
+    images: [{ url: '/images/jaipur_center_bg.png', width: 1200, height: 630, alt: 'Hodu Academy Achievers' }],
+  },
 }
 
 export default async function ResultsPage() {

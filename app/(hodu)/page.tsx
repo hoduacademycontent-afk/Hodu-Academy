@@ -35,6 +35,7 @@ import YouTubeChannelsSection, { YouTubeChannelItem, defaultYouTubeChannels } fr
 import ProgramsIllustrationInteractive from '@/components/hodu/ProgramsIllustrationInteractive'
 import { ScrollFloat, ScrollFloatCard } from '@/components/ui/ScrollFloat'
 import { parseCarouselRows } from '@/lib/homeCarousel'
+import { SITE_URL, getWebSiteSchema, getFAQPageSchema } from '@/lib/seo'
 
 export const dynamic = 'force-dynamic'
 

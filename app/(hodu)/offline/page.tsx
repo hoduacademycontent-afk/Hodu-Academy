@@ -1,4 +1,5 @@
 import { HODU, HODU_SITE_ID } from '@/lib/hodu'
+import { SITE_URL, getLocalBusinessSchema, getBreadcrumbSchema } from '@/lib/seo'
 import Link from 'next/link'
 import {
   Phone,

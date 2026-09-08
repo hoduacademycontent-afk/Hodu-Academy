@@ -1,3 +1,4 @@
+import { SITE_URL, getBreadcrumbSchema } from '@/lib/seo'
 import { HODU, HODU_SITE_ID } from '@/lib/hodu'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
@@ -10,8 +11,17 @@ import BannerElasticMesh from '@/components/ui/BannerElasticMesh'
 export const dynamic = 'force-dynamic'
 
 export const metadata = {
-  title: 'Hodu Academy Photo Gallery — PTM & Campus Life Moments',
-  description: 'Explore real photos of Parent-Teacher Meetings (PTM), daily classroom sessions, campus infrastructure, and vibrant student life at Hodu Academy Jaipur.',
+  title: 'Parent-Teacher Meetings (PTM) & Progress Roadmaps — Hodu Academy',
+  description: 'Continuous parent collaboration, personalized 1-on-1 diagnostic reviews, and transparent performance roadmaps at Hodu Academy.',
+  alternates: {
+    canonical: '/ptm',
+  },
+  openGraph: {
+    title: 'Parent-Teacher Meetings (PTM) & Progress Roadmaps — Hodu Academy',
+    description: '1-on-1 feedback sessions, academic growth logs, and collaborative mentoring.',
+    url: `${SITE_URL}/ptm`,
+    images: [{ url: '/images/ptm_section_bg.png', width: 1200, height: 630, alt: 'Hodu Academy PTM' }],
+  },
 }
 
 const defaultMoments: GalleryItem[] = [

@@ -1,11 +1,21 @@
+import { SITE_URL, getBreadcrumbSchema } from '@/lib/seo'
 import Link from 'next/link'
 import { ArrowRight, Atom, FlaskConical, Dna, BookOpen, Target, Award, Sparkles, FileText, Download } from 'lucide-react'
 import { HODU, HODU_SITE_ID } from '@/lib/hodu'
 import { createClient } from '@/lib/supabase/server'
 
 export const metadata = {
-  title: 'Study Materials & DPPs — Hodu Academy | Past Papers, Notes & Worksheets',
-  description: 'Download chapter notes, Daily Practice Problems (DPPs), mock test papers and marking scheme analysis for Cambridge IGCSE, IB DP, CBSE, JEE & NEET.',
+  title: 'Free Study Materials, DPPs & Question Banks — Hodu Academy',
+  description: 'Download chapter-wise theory booklets, Daily Practice Problems (DPPs), past board question banks, and formula cheat sheets for Cambridge IGCSE, IB DP, CBSE 9-12, JEE & NEET.',
+  alternates: {
+    canonical: '/study-materials',
+  },
+  openGraph: {
+    title: 'Free Study Materials, DPPs & Question Banks — Hodu Academy',
+    description: 'Expert-crafted study packs, DPPs, and formula sheets for high-yield exam preparation.',
+    url: `${SITE_URL}/study-materials`,
+    images: [{ url: '/images/jaipur_center_bg.png', width: 1200, height: 630, alt: 'Hodu Academy Study Materials' }],
+  },
 }
 
 const subjects = [
@@ -75,8 +85,17 @@ export default async function StudyMaterialsPage() {
     ).length
   }
 
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: 'Home', url: '/' },
+    { name: 'Study Materials', url: '/study-materials' },
+  ])
+
   return (
     <div className="space-y-0 animate-fade-in bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
 
       {/* Hero */}
       <section className="relative py-16 sm:py-20 bg-brand-maroon text-white border-b border-brand-border">

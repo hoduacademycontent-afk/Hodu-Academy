@@ -3,13 +3,23 @@ import { HODU_SITE_ID, HODU } from '@/lib/hodu'
 import { Phone, ArrowRight, Target, Eye, GraduationCap, Award } from 'lucide-react'
 import Link from 'next/link'
 import BannerElasticMesh from '@/components/ui/BannerElasticMesh'
+import { SITE_URL, getBreadcrumbSchema, getEducationalOrganizationSchema } from '@/lib/seo'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export const metadata = {
-  title: 'About Us, Our Founders & Expert Faculty — Hodu Academy',
-  description: 'Meet our visionary founders from MNIT Jaipur & IIIT Hyderabad and our top master faculty at Hodu Academy.',
+  title: 'About Us, Founders & Master Educators — Hodu Academy Jaipur',
+  description: 'Learn about Hodu Academy, our visionary founders from MNIT Jaipur & IIIT Hyderabad, and our top master faculty for Cambridge IGCSE, IB DP, CBSE, JEE & NEET.',
+  alternates: {
+    canonical: '/about',
+  },
+  openGraph: {
+    title: 'About Us, Founders & Master Educators — Hodu Academy Jaipur',
+    description: 'Visionary leadership from MNIT Jaipur & IIIT Hyderabad dedicated to academic excellence.',
+    url: `${SITE_URL}/about`,
+    images: [{ url: '/images/jaipur_center_bg.png', width: 1200, height: 630, alt: 'Hodu Academy Founders & Faculty' }],
+  },
 }
 
 // Fallback data matching https://hoduacademy.com/mod/page/view.php?id=10

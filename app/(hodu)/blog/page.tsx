@@ -1,10 +1,20 @@
 import { createClient } from '@/lib/supabase/server'
 import { HODU_SITE_ID } from '@/lib/hodu'
 import BlogListClient from '@/components/hodu/BlogListClient'
+import { SITE_URL, getBreadcrumbSchema } from '@/lib/seo'
 
 export const metadata = {
-  title: 'Site blog | Hodu Academy',
-  description: 'Official announcements, competitive exam updates, syllabus changes, and academic insights from Hodu Academy mentors.',
+  title: 'Official Academic Blog, Exam Dates & Syllabus Updates — Hodu Academy',
+  description: 'Official announcements, JEE Main / Advanced dates, NEET cutoffs, Cambridge IGCSE mark schemes, and IBDP guides from Hodu Academy mentors.',
+  alternates: {
+    canonical: '/blog',
+  },
+  openGraph: {
+    title: 'Official Academic Blog — Hodu Academy',
+    description: 'Official exam updates, dates, syllabus changes, and study guides.',
+    url: `${SITE_URL}/blog`,
+    images: [{ url: '/images/jaipur_center_bg.png', width: 1200, height: 630, alt: 'Hodu Academy Blog' }],
+  },
 }
 
 const fallbackBlogs = [
@@ -182,5 +192,18 @@ export default async function BlogPage({ searchParams }: { searchParams?: Promis
       })
     : fallbackBlogs
 
-  return <BlogListClient initialPosts={posts} />
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: 'Home', url: '/' },
+    { name: 'Blog', url: '/blog' },
+  ])
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <BlogListClient initialPosts={posts} />
+    </>
+  )
 }

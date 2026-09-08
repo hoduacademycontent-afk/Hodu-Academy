@@ -5,14 +5,35 @@ import Link from 'next/link'
 import { CheckCircle2, Clock, Calendar, Users, ArrowLeft, Phone, ChevronDown, GraduationCap, TrendingUp, MessageSquareQuote, ShieldCheck, ArrowRight } from 'lucide-react'
 import EnquiryForm from '@/components/hodu/EnquiryForm'
 import type { Metadata } from 'next'
+import { SITE_URL, getCourseSchema, getFAQPageSchema, getBreadcrumbSchema } from '@/lib/seo'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
   const supabase = await createClient()
-  const { data } = await supabase.from('cms_courses').select('title,description').eq('site_id', HODU_SITE_ID).eq('slug', slug).single()
+  const { data } = await supabase.from('cms_courses').select('*').eq('site_id', HODU_SITE_ID).eq('slug', slug).single()
+  
+  const title = data ? `${data.title} — Hodu Academy Jaipur` : 'Course — Hodu Academy'
+  const description = data?.description || 'Small 1:12 batches, examiner-guided lectures, and daily doubt desk at Hodu Academy Jaipur.'
+  const image = data?.image_url || '/images/jaipur_center_bg.png'
+
   return {
-    title: data ? `${data.title} — Hodu Academy` : 'Course — Hodu Academy',
-    description: data?.description ?? '',
+    title,
+    description,
+    alternates: {
+      canonical: `/courses/${slug}`,
+    },
+    openGraph: {
+      title,
+      description,
+      url: `${SITE_URL}/courses/${slug}`,
+      images: [{ url: image, width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [image],
+    },
   }
 }
 
@@ -53,8 +74,39 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
     .neq('slug', slug)
     .limit(3)
 
+  const courseSchema = getCourseSchema({
+    title: course.title,
+    description: course.description,
+    slug: slug,
+    category: course.category,
+    fee: course.fee,
+    class_level: course.class_level,
+    image_url: course.image_url,
+  })
+
+  const courseFaqSchema = getFAQPageSchema(courseFaqs)
+
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: 'Home', url: '/' },
+    { name: 'Courses', url: '/courses' },
+    { name: course.title, url: `/courses/${slug}` },
+  ])
+
   return (
     <div className="space-y-0 animate-fade-in bg-white">
+      {/* Schema.org Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(courseSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(courseFaqSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
 
       {/* Breadcrumb */}
       <div className="bg-white border-b border-brand-border px-4 py-3">

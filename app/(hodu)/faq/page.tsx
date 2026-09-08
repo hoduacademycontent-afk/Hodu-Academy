@@ -3,15 +3,42 @@ import Link from 'next/link'
 import { HelpCircle, MessageSquare, ChevronRight, Phone } from 'lucide-react'
 import FaqInteractiveClient from '@/components/hodu/FaqInteractiveClient'
 import BannerElasticMesh from '@/components/ui/BannerElasticMesh'
+import { SITE_URL, getFAQPageSchema, getBreadcrumbSchema } from '@/lib/seo'
+import { allFaqsData } from '@/lib/faqData'
 
 export const metadata = {
-  title: 'Frequently Asked Questions (FAQs) — Hodu Academy',
-  description: 'Find clear answers to common questions about Hodu Academy Cambridge IGCSE, IB DP, CBSE Class 9-12, JEE, NEET, Jaipur offline campus, batch sizes, fees, and test series.',
+  title: 'Frequently Asked Questions (FAQs) — Hodu Academy Jaipur',
+  description: 'Get clear answers to all questions about Hodu Academy Cambridge IGCSE, IB DP, CBSE 9-12, IIT-JEE, NEET, Jaipur offline center, batch sizes, and admission roadmap.',
+  alternates: {
+    canonical: '/faq',
+  },
+  openGraph: {
+    title: 'Frequently Asked Questions (FAQs) — Hodu Academy',
+    description: 'Admissions, batch sizes, doubt desks, international boards, and fee structure answered.',
+    url: `${SITE_URL}/faq`,
+    images: [{ url: '/images/jaipur_center_bg.png', width: 1200, height: 630, alt: 'Hodu Academy FAQs' }],
+  },
 }
 
 export default function FaqPage() {
+  const faqSchema = getFAQPageSchema(
+    allFaqsData.map(f => ({ q: f.question, a: f.answer }))
+  )
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: 'Home', url: '/' },
+    { name: 'FAQs', url: '/faq' },
+  ])
+
   return (
     <div className="bg-brand-bg min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       {/* ─── Hero Header ─── */}
       <section className="relative py-14 sm:py-20 bg-[#3D0607] text-white overflow-hidden">
         <BannerElasticMesh variant="crimson" opacity={0.9} interaction="hover" />

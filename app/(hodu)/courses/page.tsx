@@ -4,8 +4,21 @@ import Link from 'next/link'
 import { CheckCircle2, ArrowRight, Phone } from 'lucide-react'
 import EnquiryForm from '@/components/hodu/EnquiryForm'
 import ScrollReveal from '@/components/hodu/ScrollReveal'
+import { SITE_URL, getBreadcrumbSchema } from '@/lib/seo'
 
-export const metadata = { title: 'All Courses — Hodu Academy' }
+export const metadata = {
+  title: 'All Academic Courses & Programs — Hodu Academy Jaipur',
+  description: 'Explore expert-led coaching programs for Cambridge IGCSE, IB MYP & DP, CBSE Class 9-12, IIT-JEE, NEET, and Olympiads at Hodu Academy.',
+  alternates: {
+    canonical: '/courses',
+  },
+  openGraph: {
+    title: 'All Academic Courses & Programs — Hodu Academy Jaipur',
+    description: 'Small 1:12 batches, examiner-mentors, and daily doubt desks for all major school and competitive curricula.',
+    url: `${SITE_URL}/courses`,
+    images: [{ url: '/images/jaipur_center_bg.png', width: 1200, height: 630, alt: 'Hodu Academy Courses' }],
+  },
+}
 
 const defaultFeatures = [
   '600+ Hours of Teaching',
@@ -50,8 +63,17 @@ export default async function CoursesPage({ searchParams }: { searchParams: Prom
   const categoryTagline = category ? navCategoryEntries.find(c => c.value === category)?.tagline : null
   const subtitle = categoryTagline || defaultSubtitle
 
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: 'Home', url: '/' },
+    { name: 'Courses', url: '/courses' },
+  ])
+
   return (
     <div className="animate-fade-in bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
 
       {/* Hero */}
       <section className="bg-brand-maroon text-white py-14 sm:py-18 border-b border-brand-border">
