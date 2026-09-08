@@ -1,5 +1,5 @@
 // Hodu Academy - Instant-Load High-Performance Offline & PWA Service Worker Engine
-const CACHE_VERSION = 'hodu-v2.1'
+const CACHE_VERSION = 'hodu-v2.2'
 const STATIC_CACHE = `${CACHE_VERSION}-static`
 const IMAGE_CACHE = `${CACHE_VERSION}-images`
 const PAGE_CACHE = `${CACHE_VERSION}-pages`
