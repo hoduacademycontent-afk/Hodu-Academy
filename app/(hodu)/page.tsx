@@ -33,6 +33,7 @@ import ResultsMarqueeCarousel from '@/components/hodu/ResultsMarqueeCarousel'
 import AcademicExcellenceResults from '@/components/hodu/AcademicExcellenceResults'
 import YouTubeChannelsSection, { YouTubeChannelItem, defaultYouTubeChannels } from '@/components/hodu/YouTubeChannelsSection'
 import ProgramsIllustrationInteractive from '@/components/hodu/ProgramsIllustrationInteractive'
+import ScrollFloat from '@/components/ui/ScrollFloat'
 import { parseCarouselRows } from '@/lib/homeCarousel'
 
 export const dynamic = 'force-dynamic'
@@ -348,14 +349,16 @@ export default async function HomePage() {
           {/* Section Header */}
           <ScrollReveal animation="fade-up">
             <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16 space-y-3">
-              <h2 className="font-serif-editorial text-3xl sm:text-4xl lg:text-[2.65rem] font-bold text-brand-text tracking-tight leading-tight">
-                Everything You Need To{' '}
-                <span className="relative inline-block text-brand-maroon">
-                  Ace
-                  <span className="absolute -bottom-1.5 left-0 right-0 h-1 bg-brand-crimson rounded-full" />
-                </span>{' '}
-                Your Exam In One Place
-              </h2>
+              <ScrollFloat
+                as="h2"
+                containerClassName="font-serif-editorial text-3xl sm:text-4xl lg:text-[2.65rem] font-bold text-brand-text tracking-tight leading-tight"
+                animationDuration={1}
+                stagger={0.015}
+                scrollStart="top bottom-=10%"
+                scrollEnd="bottom center+=20%"
+              >
+                Everything You Need To Ace Your Exam In One Place
+              </ScrollFloat>
               <p className="text-xs sm:text-sm md:text-base text-brand-muted leading-relaxed max-w-2xl mx-auto">
                 Learn from Syllabus - Focused content and stay fully exam ready.
               </p>
@@ -377,9 +380,16 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal animation="fade-up">
             <div className="text-center mb-6 sm:mb-10">
-              <h2 className="font-serif-editorial text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-maroon">
+              <ScrollFloat
+                as="h2"
+                containerClassName="font-serif-editorial text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-maroon tracking-tight"
+                animationDuration={1}
+                stagger={0.02}
+                scrollStart="top bottom-=10%"
+                scrollEnd="bottom center+=20%"
+              >
                 Jaipur’s New Destination for Learning
-              </h2>
+              </ScrollFloat>
             </div>
           </ScrollReveal>
 
@@ -437,9 +447,16 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal animation="fade-up">
             <div className="text-center mb-6 sm:mb-8 space-y-3">
-              <h2 className="font-serif-editorial text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-maroon">
+              <ScrollFloat
+                as="h2"
+                containerClassName="font-serif-editorial text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-maroon tracking-tight"
+                animationDuration={1}
+                stagger={0.02}
+                scrollStart="top bottom-=10%"
+                scrollEnd="bottom center+=20%"
+              >
                 Regular Parent Updates & PTM
-              </h2>
+              </ScrollFloat>
               <p className="text-xs sm:text-sm text-brand-muted max-w-xl mx-auto">
                 Continuous collaboration, 1-on-1 feedback desks, and transparent performance roadmaps.
               </p>
