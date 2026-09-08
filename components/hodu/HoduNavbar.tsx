@@ -376,17 +376,9 @@ export default function HoduNavbar({
             </Link>
           </nav>
 
-          {/* Desktop Right Buttons (Log in & Register) */}
+          {/* Desktop Right Buttons (Log in only) */}
           <div className="hidden xl:flex items-center gap-3 shrink-0 ml-4">
             <PortalLoginButton />
-            <a
-              href="https://portal.hoduacademy.com/hodu-academy/learner-login"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="border-2 border-[#7A001F] text-[#7A001F] hover:bg-[#7A001F] hover:text-white px-4 2xl:px-5 py-2 rounded-full text-xs font-bold transition-all inline-flex items-center gap-1.5 shadow-2xs whitespace-nowrap"
-            >
-              <span>Register</span>
-            </a>
           </div>
 
           {/* Mobile toggle */}
@@ -508,7 +500,7 @@ export default function HoduNavbar({
                 onClick={() => setMobileOpen(false)}
                 className="block w-full border-2 border-[#7A001F] bg-[#7A001F] text-white font-bold py-3 rounded-full text-xs uppercase tracking-wider text-center transition-colors shadow-xs"
               >
-                Register / Enroll Now
+                Log In to Student Portal
               </a>
             </div>
           </div>
