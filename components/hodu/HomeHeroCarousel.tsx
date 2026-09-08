@@ -4,7 +4,6 @@ import { useState, useCallback, useEffect } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { CarouselSlide, parseMediaUrl } from '@/lib/homeCarousel'
 import { normalizeImageUrl } from '@/lib/imageUtils'
-import ElasticMesh from '@/components/ui/ElasticMesh'
 
 interface HomeHeroCarouselProps {
   ctaText?: string
@@ -69,7 +68,7 @@ export default function HomeHeroCarousel({
   return (
     <section className="w-full max-w-full overflow-hidden bg-brand-maroon relative">
       <div
-        className="relative w-full aspect-[1920/700] overflow-hidden bg-gradient-to-r from-brand-maroon via-brand-crimson to-brand-wine select-none"
+        className="relative w-full aspect-[1600/583] overflow-hidden bg-gradient-to-r from-brand-maroon via-brand-crimson to-brand-wine select-none"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
       >
@@ -122,27 +121,14 @@ export default function HomeHeroCarousel({
                   />
                 )
               ) : (
-                <div className="w-full h-full relative overflow-hidden">
+                <div className="w-full h-full relative overflow-hidden flex items-center justify-center">
                   <img
                     src={normalizeImageUrl(s.image)}
                     alt={`Banner ${idx + 1}`}
                     loading={idx === 0 ? 'eager' : 'lazy'}
                     fetchPriority={idx === 0 ? 'high' : 'auto'}
-                    className="w-full h-full object-cover object-center absolute inset-0"
+                    className="w-full h-full object-contain object-center"
                   />
-                  <div className="absolute inset-0 pointer-events-auto opacity-40 hover:opacity-75 transition-opacity duration-300 mix-blend-overlay">
-                    <ElasticMesh
-                      color1="#921E1F"
-                      color2="#3E0D0E"
-                      highlight="#FFFFFF"
-                      interaction="hover"
-                      tilt={14}
-                      shading={0.8}
-                      wobble={0.4}
-                      pull={0.35}
-                      className="w-full h-full"
-                    />
-                  </div>
                 </div>
               )}
             </div>
