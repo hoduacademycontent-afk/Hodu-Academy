@@ -283,13 +283,15 @@ export default async function LegacyPageViewPage({
                     >
                       <Phone size={16} /> Call {HODU.phone}
                     </a>
-                    <Link
-                      href="/enroll"
+                    <a
+                      href="https://portal.hoduacademy.com/hodu-academy/learner-login"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 border-2 border-white/40 hover:border-white text-white font-bold text-sm px-6 py-3.5 rounded-2xl transition-all"
                     >
                       <span>Enroll in Live Batches</span>
                       <ArrowLeft size={16} className="rotate-180" />
-                    </Link>
+                    </a>
                   </div>
                 </div>
 

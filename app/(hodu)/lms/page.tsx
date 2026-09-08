@@ -32,10 +32,14 @@ export default function LmsPage() {
             >
               Login to Portal <ExternalLink className="h-4 w-4" />
             </a>
-            <Link href="/enroll"
-              className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold px-8 py-3.5 rounded-xl transition-colors text-sm">
+            <a
+              href="https://portal.hoduacademy.com/hodu-academy/learner-login"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold px-8 py-3.5 rounded-xl transition-colors text-sm"
+            >
               New Admission →
-            </Link>
+            </a>
           </div>
         </div>
       </section>

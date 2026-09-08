@@ -199,10 +199,14 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                 <span className="text-xs text-neutral-500 font-normal">Includes complete DPP pack & testing series</span>
               </div>
               <div className="pt-3 border-t border-brand-border space-y-3">
-                <Link href="/enroll"
-                  className="w-full bg-brand-maroon hover:bg-brand-crimson text-white font-bold py-3.5 rounded-xl text-center block text-xs uppercase tracking-wider transition-all shadow-sm">
+                <a
+                  href="https://portal.hoduacademy.com/hodu-academy/learner-login"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-brand-maroon hover:bg-brand-crimson text-white font-bold py-3.5 rounded-xl text-center block text-xs uppercase tracking-wider transition-all shadow-sm"
+                >
                   Enroll in This Batch
-                </Link>
+                </a>
                 <a href={`tel:${HODU.phone}`}
                   className="w-full bg-white hover:bg-neutral-50 text-brand-maroon border-2 border-brand-maroon font-bold py-3 rounded-xl text-center flex items-center justify-center gap-2 text-xs uppercase tracking-wider transition-all">
                   <Phone className="h-4 w-4 text-brand-maroon" />
