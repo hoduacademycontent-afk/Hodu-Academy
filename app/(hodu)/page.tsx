@@ -298,7 +298,7 @@ export default async function HomePage() {
               scrollStart="top bottom-=10%"
               scrollEnd="bottom center+=20%"
             >
-              Explore Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-maroon via-brand-crimson to-brand-wine">Programs</span>
+              Explore Our <span className="text-brand-crimson">Programs</span>
             </ScrollFloat>
 
             <ScrollFloatCard y={25}>

@@ -25,9 +25,15 @@ export interface ScrollFloatProps {
 function renderSplitNode(node: React.ReactNode, keyPrefix = 'c'): React.ReactNode {
   if (typeof node === 'string' || typeof node === 'number') {
     const str = String(node);
-    return str.split('').map((char, index) => (
-      <span className="char" key={`${keyPrefix}-${index}`}>
-        {char === ' ' ? '\u00A0' : char}
+    const words = str.split(' ');
+    return words.map((word, wIdx) => (
+      <span key={`${keyPrefix}-w-${wIdx}`} className="inline-block whitespace-nowrap">
+        {word.split('').map((char, index) => (
+          <span className="char" key={`${keyPrefix}-w-${wIdx}-${index}`}>
+            {char}
+          </span>
+        ))}
+        {wIdx < words.length - 1 && <span className="inline-block">&nbsp;</span>}
       </span>
     ));
   }

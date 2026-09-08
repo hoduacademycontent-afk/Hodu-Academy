@@ -1,10 +1,10 @@
 /* ---- ScrollFloat.css ---- */
 .scroll-float {
-  overflow: hidden;
+  overflow: visible;
 }
 
 .scroll-float-text {
-  display: inline-block;
+  display: inline;
   text-align: inherit;
   line-height: inherit;
 }
