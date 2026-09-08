@@ -127,7 +127,7 @@ export default function HoduFooter({ siteName = HODU.name, logoUrl = '', site, a
               </div>
             </div>
             
-            <div className="flex gap-2 pt-2">
+            <div className="flex flex-wrap gap-2 pt-2">
               {[
                 { label: 'YouTube', href: socials.youtube },
                 { label: 'Instagram', href: socials.instagram },
@@ -135,7 +135,7 @@ export default function HoduFooter({ siteName = HODU.name, logoUrl = '', site, a
                 { label: 'LinkedIn', href: socials.linkedin },
               ].map(s => (
                 <a key={s.label} href={s.href} target="_blank" rel="noreferrer"
-                  className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white hover:text-brand-maroon text-[10px] font-bold uppercase tracking-wider transition-colors border border-white/20">
+                  className="px-2.5 sm:px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white hover:text-brand-maroon text-[10px] font-bold uppercase tracking-wider transition-colors border border-white/20 whitespace-nowrap">
                   {s.label}
                 </a>
               ))}

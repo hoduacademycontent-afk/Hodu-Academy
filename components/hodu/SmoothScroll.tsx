@@ -26,6 +26,12 @@ export default function SmoothScroll() {
       touchMultiplier: 1.2,
       infinite: false,
       autoResize: true,
+      prevent: (node: any) => {
+        return (
+          node?.hasAttribute?.('data-lenis-prevent') ||
+          !!node?.closest?.('[data-lenis-prevent], [data-prevent-scroll], .no-lenis, select, textarea')
+        )
+      },
     })
 
     let rafId: number

@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Open_Sans, Outfit } from "next/font/google";
 import "./globals.css";
 import InitialPageLoader from "@/components/hodu/InitialPageLoader";
-import TargetCursor from "@/components/ui/TargetCursor";
 import SmoothScroll from "@/components/hodu/SmoothScroll";
 import OfflinePwaManager from "@/components/hodu/OfflinePwaManager";
 import { SITE_URL, DEFAULT_GEO, GLOBAL_KEYWORDS, getEducationalOrganizationSchema, getLocalBusinessSchema } from "@/lib/seo";
@@ -161,11 +160,6 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col font-sans bg-brand-bg text-brand-text selection:bg-brand-maroon selection:text-white overflow-x-hidden max-w-full w-full">
         <SmoothScroll />
-        <TargetCursor
-          spinDuration={2}
-          hideDefaultCursor={true}
-          parallaxOn={true}
-        />
         <OfflinePwaManager />
         {children}
       </body>

@@ -240,10 +240,10 @@ export default function HoduNavbar({
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden xl:flex items-center gap-6 2xl:gap-8 flex-1 whitespace-nowrap">
+          <nav className="hidden lg:flex items-center gap-3.5 xl:gap-6 2xl:gap-8 flex-1 whitespace-nowrap">
             <Link
               href="/"
-              className={`text-xs 2xl:text-sm font-bold transition-colors ${
+              className={`text-xs xl:text-sm font-bold transition-colors ${
                 pathname === '/' ? 'text-[#7A001F] font-black' : 'text-neutral-800 hover:text-[#7A001F]'
               }`}
             >
@@ -252,7 +252,7 @@ export default function HoduNavbar({
 
             <Link
               href="/offline"
-              className={`text-xs 2xl:text-sm font-bold transition-colors ${
+              className={`text-xs xl:text-sm font-bold transition-colors ${
                 pathname === '/offline' ? 'text-[#7A001F] font-black' : 'text-neutral-800 hover:text-[#7A001F]'
               }`}
             >
@@ -269,7 +269,7 @@ export default function HoduNavbar({
               <button
                 type="button"
                 onClick={() => setHubOpen((prev) => !prev)}
-                className={`flex items-center gap-1.5 text-xs 2xl:text-sm font-bold transition-colors ${
+                className={`flex items-center gap-1.5 text-xs xl:text-sm font-bold transition-colors ${
                   isLearnersHubActive || hubOpen
                     ? 'text-[#7A001F] font-black'
                     : 'text-neutral-800 hover:text-[#7A001F]'
@@ -287,7 +287,10 @@ export default function HoduNavbar({
               {/* Mega Menu Dropdown Container */}
               {hubOpen && (
                 <div className="fixed left-1/2 -translate-x-1/2 top-[108px] w-[95vw] max-w-7xl z-50 animate-fade-in">
-                  <div className="bg-white border border-[#E5E7EB] rounded-2xl shadow-2xl p-6 lg:p-8 max-h-[80vh] overflow-y-auto">
+                  <div
+                    data-lenis-prevent
+                    className="bg-white border border-[#E5E7EB] rounded-2xl shadow-2xl p-6 lg:p-8 max-h-[80vh] overflow-y-auto overscroll-contain"
+                  >
                     
                     {/* Row 1 Grid (5 Columns) */}
                     <div className="grid grid-cols-5 gap-6 lg:gap-8 pb-8 border-b border-neutral-100">
@@ -350,7 +353,7 @@ export default function HoduNavbar({
 
             <Link
               href="/about"
-              className={`text-xs 2xl:text-sm font-bold transition-colors ${
+              className={`text-xs xl:text-sm font-bold transition-colors ${
                 pathname === '/about' ? 'text-[#7A001F] font-black' : 'text-neutral-800 hover:text-[#7A001F]'
               }`}
             >
@@ -359,7 +362,7 @@ export default function HoduNavbar({
 
             <Link
               href="/blog"
-              className={`text-xs 2xl:text-sm font-bold transition-colors ${
+              className={`text-xs xl:text-sm font-bold transition-colors ${
                 pathname === '/blog' || pathname.startsWith('/blog/') ? 'text-[#7A001F] font-black' : 'text-neutral-800 hover:text-[#7A001F]'
               }`}
             >
@@ -368,7 +371,7 @@ export default function HoduNavbar({
 
             <Link
               href="/contact"
-              className={`text-xs 2xl:text-sm font-bold transition-colors ${
+              className={`text-xs xl:text-sm font-bold transition-colors ${
                 pathname === '/contact' ? 'text-[#7A001F] font-black' : 'text-neutral-800 hover:text-[#7A001F]'
               }`}
             >
@@ -377,12 +380,12 @@ export default function HoduNavbar({
           </nav>
 
           {/* Desktop Right Buttons (Log in only) */}
-          <div className="hidden xl:flex items-center gap-3 shrink-0 ml-4">
+          <div className="hidden lg:flex items-center gap-3 shrink-0 ml-4">
             <PortalLoginButton />
           </div>
 
           {/* Mobile toggle */}
-          <div className="flex xl:hidden items-center gap-2">
+          <div className="flex lg:hidden items-center gap-2">
             <PortalLoginButton compact />
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
@@ -397,7 +400,10 @@ export default function HoduNavbar({
 
       {/* Mobile / Tablet Drawer */}
       {mobileOpen && (
-        <div className="xl:hidden border-t border-brand-border bg-white animate-fade-in max-h-[calc(100vh-5rem)] overflow-y-auto">
+        <div
+          data-lenis-prevent
+          className="lg:hidden border-t border-brand-border bg-white animate-fade-in max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain"
+        >
           <div className="px-4 pt-3 pb-6 space-y-2">
             <Link
               href="/"
@@ -437,7 +443,10 @@ export default function HoduNavbar({
               </div>
 
               {mobileHubExpanded && (
-                <div className="bg-white px-4 py-3 space-y-4 max-h-96 overflow-y-auto">
+                <div
+                  data-lenis-prevent
+                  className="bg-white px-4 py-3 space-y-4 max-h-[60vh] overflow-y-auto overscroll-contain"
+                >
                   {[...LEARNERS_HUB_DATA.row1, ...LEARNERS_HUB_DATA.row2].map((section) => (
                     <div key={section.title} className="space-y-1.5">
                       <h4 className="text-[11px] font-extrabold text-neutral-800 uppercase tracking-wider border-b border-neutral-100 pb-1">
