@@ -33,7 +33,7 @@ import ResultsMarqueeCarousel from '@/components/hodu/ResultsMarqueeCarousel'
 import AcademicExcellenceResults from '@/components/hodu/AcademicExcellenceResults'
 import YouTubeChannelsSection, { YouTubeChannelItem, defaultYouTubeChannels } from '@/components/hodu/YouTubeChannelsSection'
 import ProgramsIllustrationInteractive from '@/components/hodu/ProgramsIllustrationInteractive'
-import ScrollFloat from '@/components/ui/ScrollFloat'
+import { ScrollFloat, ScrollFloatCard } from '@/components/ui/ScrollFloat'
 import { parseCarouselRows } from '@/lib/homeCarousel'
 
 export const dynamic = 'force-dynamic'
@@ -286,25 +286,36 @@ export default async function HomePage() {
         {/* Subtle decorative background ambient glow */}
         <div className="absolute top-0 right-1/4 w-96 h-48 bg-brand-maroon/5 blur-[90px] rounded-full pointer-events-none -z-10" />
 
-        <ScrollReveal animation="fade-up">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center mb-10 sm:mb-14">
-            
-            {/* Left Column: Heading, Subtext, Badges & CTA */}
-            <div className="lg:col-span-7 space-y-4 text-center lg:text-left">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center mb-10 sm:mb-14">
+          
+          {/* Left Column: Heading, Subtext, Badges & CTA */}
+          <div className="lg:col-span-7 space-y-4 text-center lg:text-left">
+            <ScrollFloatCard y={20}>
               <div className="inline-flex items-center gap-2 bg-brand-blush/80 text-brand-maroon text-xs font-extrabold uppercase tracking-wider px-3.5 py-1.5 rounded-full border border-brand-maroon/20">
                 <Sparkles size={13} className="text-brand-crimson" />
                 <span>Curated Academic Pathways 2026</span>
               </div>
+            </ScrollFloatCard>
 
-              <h2 className="font-serif-editorial text-3xl sm:text-4xl lg:text-[2.75rem] font-bold text-brand-maroon leading-[1.18] tracking-tight">
-                Explore Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-maroon via-brand-crimson to-brand-wine">Programs</span>
-              </h2>
+            <ScrollFloat
+              as="h2"
+              containerClassName="font-serif-editorial text-3xl sm:text-4xl lg:text-[2.75rem] font-bold text-brand-maroon leading-[1.18] tracking-tight"
+              animationDuration={1}
+              stagger={0.015}
+              scrollStart="top bottom-=10%"
+              scrollEnd="bottom center+=20%"
+            >
+              Explore Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-maroon via-brand-crimson to-brand-wine">Programs</span>
+            </ScrollFloat>
 
+            <ScrollFloatCard y={25}>
               <p className="text-xs sm:text-sm md:text-base text-brand-muted leading-relaxed max-w-xl mx-auto lg:mx-0">
                 Choose the right program for your academic goals with examiner-guided teaching, 1:12 intimate batches, and daily 1-on-1 personal doubt support.
               </p>
+            </ScrollFloatCard>
 
-              {/* Curriculums Mini Pills */}
+            {/* Curriculums Mini Pills */}
+            <ScrollFloatCard y={30}>
               <div className="flex items-center justify-center lg:justify-start gap-2 flex-wrap pt-1">
                 {['Cambridge IGCSE & A-Levels', 'IB Diploma (MYP & DP)', 'CBSE Board Masterclass', 'IIT-JEE & NEET-UG'].map((cur, cIdx) => (
                   <span key={cIdx} className="text-[11px] font-bold bg-white text-neutral-700 border border-neutral-200/90 shadow-2xs px-3 py-1 rounded-full">
@@ -312,8 +323,10 @@ export default async function HomePage() {
                   </span>
                 ))}
               </div>
+            </ScrollFloatCard>
 
-              {/* CTA Button */}
+            {/* CTA Button */}
+            <ScrollFloatCard y={30}>
               <div className="pt-2 flex justify-center lg:justify-start">
                 <Link
                   href="/courses"
@@ -325,19 +338,21 @@ export default async function HomePage() {
                   </div>
                 </Link>
               </div>
-            </div>
-
-            {/* Right Column: Mouse-Interactive Parallax 3D Illustration (Hidden on Mobile) */}
-            <div className="hidden lg:flex lg:col-span-5 justify-center">
-              <ProgramsIllustrationInteractive />
-            </div>
-
+            </ScrollFloatCard>
           </div>
-        </ScrollReveal>
 
-        <ScrollReveal animation="fade-up" delay={100}>
+          {/* Right Column: Mouse-Interactive Parallax 3D Illustration (Hidden on Mobile) */}
+          <div className="hidden lg:flex lg:col-span-5 justify-center">
+            <ScrollFloatCard y={40} scale={0.94}>
+              <ProgramsIllustrationInteractive />
+            </ScrollFloatCard>
+          </div>
+
+        </div>
+
+        <ScrollFloatCard y={35}>
           <BatchCardsCarousel tracks={activeBatches} />
-        </ScrollReveal>
+        </ScrollFloatCard>
       </section>
 
       {/* 4. Everything You Need To Ace Your Exam In One Place */}
@@ -347,28 +362,28 @@ export default async function HomePage() {
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Header */}
-          <ScrollReveal animation="fade-up">
-            <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16 space-y-3">
-              <ScrollFloat
-                as="h2"
-                containerClassName="font-serif-editorial text-3xl sm:text-4xl lg:text-[2.65rem] font-bold text-brand-text tracking-tight leading-tight"
-                animationDuration={1}
-                stagger={0.015}
-                scrollStart="top bottom-=10%"
-                scrollEnd="bottom center+=20%"
-              >
-                Everything You Need To Ace Your Exam In One Place
-              </ScrollFloat>
+          <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16 space-y-3">
+            <ScrollFloat
+              as="h2"
+              containerClassName="font-serif-editorial text-3xl sm:text-4xl lg:text-[2.65rem] font-bold text-brand-text tracking-tight leading-tight"
+              animationDuration={1}
+              stagger={0.015}
+              scrollStart="top bottom-=10%"
+              scrollEnd="bottom center+=20%"
+            >
+              Everything You Need To Ace Your Exam In One Place
+            </ScrollFloat>
+            <ScrollFloatCard y={20}>
               <p className="text-xs sm:text-sm md:text-base text-brand-muted leading-relaxed max-w-2xl mx-auto">
                 Learn from Syllabus - Focused content and stay fully exam ready.
               </p>
-            </div>
-          </ScrollReveal>
+            </ScrollFloatCard>
+          </div>
 
           {/* 4 Feature 3D Book Cards with Horizontal Scroll on Mobile */}
-          <ScrollReveal animation="fade-up" delay={100}>
+          <ScrollFloatCard y={40}>
             <FeatureCardsCarousel features={learningFeatures} />
-          </ScrollReveal>
+          </ScrollFloatCard>
         </div>
       </section>
 
@@ -376,24 +391,22 @@ export default async function HomePage() {
       <AcademicExcellenceResults decks={(home as any)?.customAcademicDecks} />
 
       {/* 6. Jaipur Physical Learning Center Banner */}
-      <section className="py-10 sm:py-16 bg-white border-y border-brand-border">
+      <section className="py-10 sm:py-16 bg-white border-y border-brand-border overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal animation="fade-up">
-            <div className="text-center mb-6 sm:mb-10">
-              <ScrollFloat
-                as="h2"
-                containerClassName="font-serif-editorial text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-maroon tracking-tight"
-                animationDuration={1}
-                stagger={0.02}
-                scrollStart="top bottom-=10%"
-                scrollEnd="bottom center+=20%"
-              >
-                Jaipur’s New Destination for Learning
-              </ScrollFloat>
-            </div>
-          </ScrollReveal>
+          <div className="text-center mb-6 sm:mb-10">
+            <ScrollFloat
+              as="h2"
+              containerClassName="font-serif-editorial text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-maroon tracking-tight"
+              animationDuration={1}
+              stagger={0.02}
+              scrollStart="top bottom-=10%"
+              scrollEnd="bottom center+=20%"
+            >
+              Jaipur’s New Destination for Learning
+            </ScrollFloat>
+          </div>
 
-          <ScrollReveal animation="fade-up" delay={80}>
+          <ScrollFloatCard y={35} scale={0.96}>
             <div className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden border border-brand-border shadow-md bg-brand-maroon group">
               {/* Full Banner Graphic from Google Drive */}
               <img
@@ -438,30 +451,32 @@ export default async function HomePage() {
                 <span>Book Free Campus Visit</span>
               </Link>
             </div>
-          </ScrollReveal>
+          </ScrollFloatCard>
         </div>
       </section>
 
       {/* 7. Regular Parent Updates & PTM Section */}
-      <section className="py-12 sm:py-16 bg-white border-y border-brand-border">
+      <section className="py-12 sm:py-16 bg-white border-y border-brand-border overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal animation="fade-up">
-            <div className="text-center mb-6 sm:mb-8 space-y-3">
-              <ScrollFloat
-                as="h2"
-                containerClassName="font-serif-editorial text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-maroon tracking-tight"
-                animationDuration={1}
-                stagger={0.02}
-                scrollStart="top bottom-=10%"
-                scrollEnd="bottom center+=20%"
-              >
-                Regular Parent Updates & PTM
-              </ScrollFloat>
+          <div className="text-center mb-6 sm:mb-8 space-y-3">
+            <ScrollFloat
+              as="h2"
+              containerClassName="font-serif-editorial text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-maroon tracking-tight"
+              animationDuration={1}
+              stagger={0.02}
+              scrollStart="top bottom-=10%"
+              scrollEnd="bottom center+=20%"
+            >
+              Regular Parent Updates & PTM
+            </ScrollFloat>
+            <ScrollFloatCard y={20}>
               <p className="text-xs sm:text-sm text-brand-muted max-w-xl mx-auto">
                 Continuous collaboration, 1-on-1 feedback desks, and transparent performance roadmaps.
               </p>
+            </ScrollFloatCard>
 
-              {/* Action Buttons below section heading */}
+            {/* Action Buttons below section heading */}
+            <ScrollFloatCard y={25}>
               <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3.5 pt-1">
                 <Link
                   href="/ptm"
@@ -478,11 +493,11 @@ export default async function HomePage() {
                   <span>Book Parent Consultation</span>
                 </Link>
               </div>
-            </div>
-          </ScrollReveal>
+            </ScrollFloatCard>
+          </div>
 
           {/* Banner Graphic - Compact / Sleek Height */}
-          <ScrollReveal animation="fade-up" delay={80}>
+          <ScrollFloatCard y={35} scale={0.96}>
             <div className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden border border-brand-border shadow-md bg-[#250607]">
               <img
                 src="/images/ptm_section_bg.png"
@@ -490,7 +505,7 @@ export default async function HomePage() {
                 className="w-full h-auto max-h-[420px] object-cover sm:object-contain object-center block select-none"
               />
             </div>
-          </ScrollReveal>
+          </ScrollFloatCard>
         </div>
       </section>
 
@@ -498,25 +513,34 @@ export default async function HomePage() {
       <YouTubeChannelsSection channels={ytChannels} />
 
       {/* 9. FAQ Accordion */}
-      <section className="py-12 sm:py-16 bg-white border-y border-brand-border">
+      <section className="py-12 sm:py-16 bg-white border-y border-brand-border overflow-hidden">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal animation="fade-up">
-            <div className="text-center mb-8">
-              <span className="inline-block bg-brand-maroon text-white text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-2">
+          <div className="text-center mb-8 space-y-2">
+            <ScrollFloatCard y={15}>
+              <span className="inline-block bg-brand-maroon text-white text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
                 FAQ
               </span>
-              <h2 className="font-serif-editorial text-2xl sm:text-3xl font-bold text-brand-maroon">
-                Frequently Asked Questions
-              </h2>
-            </div>
-          </ScrollReveal>
+            </ScrollFloatCard>
+            <ScrollFloat
+              as="h2"
+              containerClassName="font-serif-editorial text-2xl sm:text-3xl font-bold text-brand-maroon"
+              animationDuration={1}
+              stagger={0.015}
+              scrollStart="top bottom-=10%"
+              scrollEnd="bottom center+=20%"
+            >
+              Frequently Asked Questions
+            </ScrollFloat>
+          </div>
 
           <div className="space-y-3">
             {faqs.map((faq, i) => (
-              <ScrollReveal
+              <ScrollFloatCard
                 key={i}
-                animation="fade-up"
-                delay={i * 50}
+                y={25}
+                scale={0.98}
+                scrollStart="top bottom-=5%"
+                scrollEnd="bottom center+=25%"
               >
                 <details className="group border border-brand-border rounded-xl overflow-hidden bg-brand-bg">
                   <summary className="flex items-center justify-between px-4 py-3.5 cursor-pointer list-none hover:bg-white transition-colors">
@@ -527,38 +551,51 @@ export default async function HomePage() {
                     {faq.a}
                   </div>
                 </details>
-              </ScrollReveal>
+              </ScrollFloatCard>
             ))}
           </div>
         </div>
       </section>
 
-      {/* 9. Free Academic Consultation Form */}
+      {/* 10. Free Academic Consultation Form */}
       <section className="py-12 sm:py-16 bg-brand-blush overflow-hidden">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-8 items-center">
-          <ScrollReveal animation="fade-left" className="space-y-3">
-            <span className="inline-block bg-brand-maroon text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
-              TALK TO AN ACADEMIC EXPERT
-            </span>
-            <h2 className="font-serif-editorial text-2xl sm:text-3xl font-bold text-brand-maroon leading-tight">
+          <div className="space-y-3">
+            <ScrollFloatCard y={15}>
+              <span className="inline-block bg-brand-maroon text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
+                TALK TO AN ACADEMIC EXPERT
+              </span>
+            </ScrollFloatCard>
+            <ScrollFloat
+              as="h2"
+              containerClassName="font-serif-editorial text-2xl sm:text-3xl font-bold text-brand-maroon leading-tight"
+              animationDuration={1}
+              stagger={0.015}
+              scrollStart="top bottom-=10%"
+              scrollEnd="bottom center+=20%"
+            >
               Get Free Academic Counseling & Syllabus Roadmap
-            </h2>
-            <p className="text-xs sm:text-sm text-brand-muted leading-relaxed">
-              Connect with our academic directors to analyze your previous scorecards and choose the right batch.
-            </p>
-            <div className="space-y-2 pt-2 text-xs">
-              <div className="flex items-center gap-2 text-brand-text font-semibold">
-                <Phone className="h-4 w-4 text-brand-maroon" />
-                <span>Helpline: {HODU.phone}</span>
+            </ScrollFloat>
+            <ScrollFloatCard y={20}>
+              <p className="text-xs sm:text-sm text-brand-muted leading-relaxed">
+                Connect with our academic directors to analyze your previous scorecards and choose the right batch.
+              </p>
+            </ScrollFloatCard>
+            <ScrollFloatCard y={25}>
+              <div className="space-y-2 pt-2 text-xs">
+                <div className="flex items-center gap-2 text-brand-text font-semibold">
+                  <Phone className="h-4 w-4 text-brand-maroon" />
+                  <span>Helpline: {HODU.phone}</span>
+                </div>
+                <div className="flex items-center gap-2 text-brand-text font-semibold">
+                  <MapPin className="h-4 w-4 text-brand-maroon" />
+                  <span>Campus: {HODU.address}</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-brand-text font-semibold">
-                <MapPin className="h-4 w-4 text-brand-maroon" />
-                <span>Campus: {HODU.address}</span>
-              </div>
-            </div>
-          </ScrollReveal>
+            </ScrollFloatCard>
+          </div>
 
-          <ScrollReveal animation="fade-right">
+          <ScrollFloatCard y={35} scale={0.96}>
             <div className="bg-white border border-brand-border rounded-2xl p-6 shadow-sm">
               <h3 className="font-serif-editorial font-bold text-brand-maroon text-lg mb-1">
                 Request Free Callback
@@ -568,7 +605,7 @@ export default async function HomePage() {
               </p>
               <EnquiryForm />
             </div>
-          </ScrollReveal>
+          </ScrollFloatCard>
         </div>
       </section>
 

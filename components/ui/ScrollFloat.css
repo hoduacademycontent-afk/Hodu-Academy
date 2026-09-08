@@ -13,3 +13,7 @@
   display: inline-block;
   will-change: transform, opacity;
 }
+
+.scroll-float-card {
+  will-change: transform, opacity;
+}

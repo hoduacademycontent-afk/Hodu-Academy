@@ -1,7 +1,9 @@
+'use client'
+
 import React from 'react'
 import { ExternalLink, Play } from 'lucide-react'
-import ScrollReveal from './ScrollReveal'
 import { normalizeImageUrl } from '@/lib/imageUtils'
+import { ScrollFloat, ScrollFloatCard } from '@/components/ui/ScrollFloat'
 
 export interface YouTubeChannelItem {
   id?: string
@@ -40,27 +42,36 @@ export default function YouTubeChannelsSection({ channels }: YouTubeChannelsSect
   const list = channels && channels.length > 0 ? channels : defaultYouTubeChannels
 
   return (
-    <section className="py-14 sm:py-20 bg-gradient-to-b from-white via-[#FDF8F8] to-white border-y border-brand-border">
+    <section className="py-14 sm:py-20 bg-gradient-to-b from-white via-[#FDF8F8] to-white border-y border-brand-border overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Heading */}
-        <ScrollReveal animation="fade-up">
-          <div className="text-center mb-10 sm:mb-14 space-y-2.5">
-            <h2 className="font-serif-editorial text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-maroon leading-tight">
-              Be Part Of The <span className="underline decoration-[#FF0000] decoration-3 underline-offset-6">Hodu Family</span>, Today!
-            </h2>
+        <div className="text-center mb-10 sm:mb-14 space-y-2.5">
+          <ScrollFloat
+            as="h2"
+            containerClassName="font-serif-editorial text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-maroon leading-tight"
+            animationDuration={1}
+            stagger={0.015}
+            scrollStart="top bottom-=10%"
+            scrollEnd="bottom center+=20%"
+          >
+            Be Part Of The <span className="underline decoration-[#FF0000] decoration-3 underline-offset-6">Hodu Family</span>, Today!
+          </ScrollFloat>
+          <ScrollFloatCard y={20}>
             <p className="text-xs sm:text-sm text-brand-muted max-w-2xl mx-auto leading-relaxed">
               Explore our growing network of YouTube channels and subscribe for free access to world-class educators, problem-solving masterclasses, and exam strategies.
             </p>
-          </div>
-        </ScrollReveal>
+          </ScrollFloatCard>
+        </div>
 
         {/* 3 Channels Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
           {list.map((channel, idx) => (
-            <ScrollReveal
+            <ScrollFloatCard
               key={channel.id || idx}
-              animation="fade-up"
-              delay={idx * 80}
+              y={30 + idx * 10}
+              scale={0.96}
+              scrollStart="top bottom-=5%"
+              scrollEnd="bottom center+=25%"
               className="h-full"
             >
               <a
@@ -108,7 +119,7 @@ export default function YouTubeChannelsSection({ channels }: YouTubeChannelsSect
                   </div>
                 </div>
               </a>
-            </ScrollReveal>
+            </ScrollFloatCard>
           ))}
         </div>
       </div>

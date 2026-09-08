@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight, Trophy, Sparkles, Award, ArrowRight } from 'lucide-react'
 import ScrollReveal from './ScrollReveal'
+import { ScrollFloat, ScrollFloatCard } from '@/components/ui/ScrollFloat'
 import { normalizeImageUrl } from '@/lib/imageUtils'
 
 export interface StudentPerformer {
@@ -254,15 +255,24 @@ export default function AcademicExcellenceResults({
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         
         {/* ─── Section Header ─── */}
-        <ScrollReveal animation="fade-up">
-          <div className="text-center mb-6 sm:mb-10 space-y-3">
-            <h2 className="font-serif-editorial text-2xl sm:text-3xl lg:text-4xl font-black text-brand-maroon tracking-tight">
-              Academic Excellence : Results
-            </h2>
+        <div className="text-center mb-6 sm:mb-10 space-y-3">
+          <ScrollFloat
+            as="h2"
+            containerClassName="font-serif-editorial text-2xl sm:text-3xl lg:text-4xl font-black text-brand-maroon tracking-tight"
+            animationDuration={1}
+            stagger={0.015}
+            scrollStart="top bottom-=10%"
+            scrollEnd="bottom center+=20%"
+          >
+            Academic Excellence : Results
+          </ScrollFloat>
+          <ScrollFloatCard y={20}>
             <p className="text-xs sm:text-sm text-brand-muted font-medium max-w-xl mx-auto">
               Giving wings to a million dreams, a million more to go
             </p>
-            {showViewAllButton && (
+          </ScrollFloatCard>
+          {showViewAllButton && (
+            <ScrollFloatCard y={25}>
               <div className="pt-1">
                 <Link
                   href="/results"
@@ -272,12 +282,12 @@ export default function AcademicExcellenceResults({
                   <ArrowRight className="h-3.5 w-3.5 transform group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>
-            )}
-          </div>
-        </ScrollReveal>
+            </ScrollFloatCard>
+          )}
+        </div>
 
         {/* ─── Filter Tabs Bar (Pills) ─── */}
-        <ScrollReveal animation="fade-up" delay={60}>
+        <ScrollFloatCard y={25}>
           <div className="flex items-center justify-start md:justify-center gap-1.5 sm:gap-2 overflow-x-auto pb-3 pt-1 px-1 scrollbar-none no-scrollbar">
             {activeDecks.map((deck, idx) => {
               const isActive = idx === activeDeckIdx
@@ -296,10 +306,10 @@ export default function AcademicExcellenceResults({
               )
             })}
           </div>
-        </ScrollReveal>
+        </ScrollFloatCard>
 
         {/* ─── Main Banner Carousel Card ─── */}
-        <ScrollReveal animation="zoom-in" delay={100}>
+        <ScrollFloatCard y={35} scale={0.96}>
           <div className="relative mt-2 sm:mt-6">
             
             {/* Desktop Left Nav Arrow Button */}
@@ -509,11 +519,11 @@ export default function AcademicExcellenceResults({
 
             </div>
           </div>
-        </ScrollReveal>
+        </ScrollFloatCard>
 
         {/* Bottom View All Achievers Callout Button */}
         {showViewAllButton && (
-          <ScrollReveal animation="fade-up" delay={120}>
+          <ScrollFloatCard y={30}>
             <div className="text-center pt-8">
               <Link
                 href="/results"
@@ -523,7 +533,7 @@ export default function AcademicExcellenceResults({
                 <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1.5 transition-transform" />
               </Link>
             </div>
-          </ScrollReveal>
+          </ScrollFloatCard>
         )}
 
       </div>
