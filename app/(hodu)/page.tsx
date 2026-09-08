@@ -290,13 +290,6 @@ export default async function HomePage() {
           
           {/* Left Column: Heading, Subtext, Badges & CTA */}
           <div className="lg:col-span-7 space-y-4 text-center lg:text-left">
-            <ScrollFloatCard y={20}>
-              <div className="inline-flex items-center gap-2 bg-brand-blush/80 text-brand-maroon text-xs font-extrabold uppercase tracking-wider px-3.5 py-1.5 rounded-full border border-brand-maroon/20">
-                <Sparkles size={13} className="text-brand-crimson" />
-                <span>Curated Academic Pathways 2026</span>
-              </div>
-            </ScrollFloatCard>
-
             <ScrollFloat
               as="h2"
               containerClassName="font-serif-editorial text-3xl sm:text-4xl lg:text-[2.75rem] font-bold text-brand-maroon leading-[1.18] tracking-tight"
