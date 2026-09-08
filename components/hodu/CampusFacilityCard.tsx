@@ -110,7 +110,7 @@ export default function CampusFacilityCard({ item }: CampusFacilityCardProps) {
             Campus Facility
           </span>
           <a
-            href="https://portal.hoduacademy.com/"
+            href="https://portal.hoduacademy.com/hodu-academy/learner-login"
             target="_blank"
             rel="noopener noreferrer"
             onClick={e => e.stopPropagation()}

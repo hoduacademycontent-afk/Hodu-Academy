@@ -8,7 +8,7 @@ interface PortalLoginButtonProps {
 export default function PortalLoginButton({ className = '', compact = false }: PortalLoginButtonProps) {
   return (
     <a
-      href="https://portal.hoduacademy.com/"
+      href="https://portal.hoduacademy.com/hodu-academy/learner-login"
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Student & Parent Portal Log In"

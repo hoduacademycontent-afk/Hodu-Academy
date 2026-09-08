@@ -25,7 +25,7 @@ export default function LmsPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <a
-              href="https://hoduacademy.com/login"
+              href="https://portal.hoduacademy.com/hodu-academy/learner-login"
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center justify-center gap-2 bg-brand-maroon hover:bg-brand-accent text-white font-bold px-8 py-3.5 rounded-xl transition-colors text-sm"
