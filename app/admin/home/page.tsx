@@ -188,8 +188,10 @@ export default function HomeContentPage() {
       const mediaInfo = parseMediaUrl(row.image_url ?? '')
       const mediaType = text.mediaType ?? (mediaInfo.type !== 'image' ? 'video' : 'image')
       const videoUrl = text.videoUrl ?? (mediaType === 'video' ? row.image_url : '')
+      const linkUrl = text.linkUrl ?? text.link ?? text.href ?? ''
       return {
         ...row,
+        linkUrl,
         mediaType,
         videoUrl,
         headingHtml: text.headingHtml ?? '',
@@ -292,6 +294,7 @@ export default function HomeContentPage() {
     const caption = JSON.stringify({
       mediaType: slide.mediaType ?? 'image',
       videoUrl: slide.videoUrl ?? '',
+      linkUrl: (slide.linkUrl ?? '').trim(),
       headingHtml: unwrapParagraph(slide.headingHtml ?? ''),
       subtitleHtml: unwrapParagraph(slide.subtitleHtml ?? ''),
       imageOpacity: slide.imageOpacity ?? 100,
@@ -306,10 +309,10 @@ export default function HomeContentPage() {
       site_id: SITE_ID,
       category: 'Home Carousel',
       image_url: '',
-      caption: JSON.stringify({ mediaType: 'image', videoUrl: '', headingHtml: '', subtitleHtml: '', imageOpacity: 100 }),
+      caption: JSON.stringify({ mediaType: 'image', videoUrl: '', linkUrl: '', headingHtml: '', subtitleHtml: '', imageOpacity: 100 }),
       sort_order: nextOrder,
     }).select().single()
-    if (data) setSlides(prev => [...prev, { ...data, mediaType: 'image', videoUrl: '', headingHtml: '', subtitleHtml: '', imageOpacity: 100 }])
+    if (data) setSlides(prev => [...prev, { ...data, mediaType: 'image', videoUrl: '', linkUrl: '', headingHtml: '', subtitleHtml: '', imageOpacity: 100 }])
   }
 
   async function deleteSlide(id: string) {
@@ -741,6 +744,20 @@ export default function HomeContentPage() {
                           label="Slide Cover Image"
                         />
                       )}
+
+                      {/* Click Target URL */}
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-neutral-600 block">
+                          Click Target URL (e.g. Test Series or Course Link)
+                        </label>
+                        <input
+                          type="text"
+                          value={slide.linkUrl ?? ''}
+                          onChange={e => updateSlideLocal(slide.id, { linkUrl: e.target.value })}
+                          placeholder="https://courses.hoduacademy.com/tests/..."
+                          className="w-full border border-neutral-300 rounded-xl px-3 py-2 text-xs bg-white text-neutral-800 placeholder:text-neutral-400 focus:outline-none focus:border-[#7E0D0D]"
+                        />
+                      </div>
 
                       {/* Save Button */}
                       <div className="pt-2">

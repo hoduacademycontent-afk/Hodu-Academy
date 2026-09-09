@@ -15,7 +15,7 @@ interface HomeHeroCarouselProps {
   initialSlides?: CarouselSlide[]
 }
 
-const hardcodedSlides: { image: string; mediaType?: 'image' | 'video'; videoUrl?: string }[] = [
+const hardcodedSlides: { image: string; linkUrl?: string; mediaType?: 'image' | 'video'; videoUrl?: string }[] = [
   {
     image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1920&h=700&fit=crop&auto=format',
     mediaType: 'image',
@@ -38,12 +38,13 @@ export default function HomeHeroCarousel({
     if (initialSlides && initialSlides.length > 0) {
       return initialSlides.map((s, i) => ({
         image: s.image || hardcodedSlides[i % hardcodedSlides.length].image,
+        linkUrl: s.linkUrl || '',
         mediaType: s.mediaType ?? 'image',
         videoUrl: s.videoUrl ?? '',
       }))
     }
     if (heroImage) {
-      return [{ image: heroImage, mediaType: 'image' as const }, ...hardcodedSlides.slice(1)]
+      return [{ image: heroImage, linkUrl: '', mediaType: 'image' as const }, ...hardcodedSlides.slice(1)]
     }
     return hardcodedSlides
   })()
@@ -120,6 +121,21 @@ export default function HomeHeroCarousel({
                     className="w-full h-full object-cover absolute inset-0 bg-black"
                   />
                 )
+              ) : s.linkUrl ? (
+                <a
+                  href={s.linkUrl}
+                  target={s.linkUrl.startsWith('http') ? '_blank' : '_self'}
+                  rel={s.linkUrl.startsWith('http') ? 'noopener noreferrer' : undefined}
+                  className="w-full h-full relative overflow-hidden flex items-center justify-center cursor-pointer group"
+                >
+                  <img
+                    src={normalizeImageUrl(s.image)}
+                    alt={`Banner ${idx + 1}`}
+                    loading={idx === 0 ? 'eager' : 'lazy'}
+                    fetchPriority={idx === 0 ? 'high' : 'auto'}
+                    className="w-full h-full object-contain object-center transition-transform duration-300 group-hover:scale-[1.01]"
+                  />
+                </a>
               ) : (
                 <div className="w-full h-full relative overflow-hidden flex items-center justify-center">
                   <img

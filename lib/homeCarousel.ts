@@ -16,6 +16,7 @@ export type MediaType = 'image' | 'video'
 
 export type CarouselSlide = {
   image: string
+  linkUrl?: string
   mediaType?: MediaType
   videoUrl?: string
   headingHtml: string
@@ -67,6 +68,7 @@ export function parseMediaUrl(url: string): { type: 'google_drive' | 'youtube' |
 
 export const defaultFallbackSlide: CarouselSlide = {
   image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1920&h=700&fit=crop&auto=format',
+  linkUrl: '',
   mediaType: 'image',
   headingHtml: `${toHtml('Everything You Need To ')}<span style="color:#921E1F">Ace Your Exam In Place</span>`,
   subtitleHtml: toHtml('Top faculty · Live & recorded classes · Test series · Personal mentoring — all in one place.', '#475569'),
@@ -86,8 +88,10 @@ export function parseCarouselRows(rows: { image_url: string; caption: string | n
         const subtitleHtml = t.subtitleHtml ?? toHtml(t.subtitle ?? '', t.subtitleColor ?? '#475569')
         const mediaType: MediaType = t.mediaType ?? (parseMediaUrl(normalizedImg).type !== 'image' ? 'video' : 'image')
         const videoUrl = t.videoUrl ?? (mediaType === 'video' ? normalizedImg : '')
+        const linkUrl = t.linkUrl ?? t.link ?? t.href ?? ''
         return {
           image: normalizedImg,
+          linkUrl,
           mediaType,
           videoUrl,
           headingHtml,
@@ -102,6 +106,7 @@ export function parseCarouselRows(rows: { image_url: string; caption: string | n
         const mediaInfo = parseMediaUrl(normalizedImg)
         return {
           image: normalizedImg,
+          linkUrl: '',
           mediaType: mediaInfo.type !== 'image' ? 'video' : 'image',
           videoUrl: mediaInfo.type !== 'image' ? normalizedImg : '',
           headingHtml: toHtml(d.caption ?? ''),
