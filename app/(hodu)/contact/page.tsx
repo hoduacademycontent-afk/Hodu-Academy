@@ -29,18 +29,35 @@ export default function ContactPage() {
       setErr('Please enter a valid name and 10-digit mobile number.')
       return
     }
-    setLoading(true); setErr('')
-    const supabase = createClient()
-    const { error } = await supabase.from('cms_leads').insert({
-      site_id: HODU_SITE_ID,
-      name: form.name,
-      phone: form.phone,
-      message: `[${form.category}] ${form.email} — ${form.message}`,
-      status: 'new',
-    })
-    if (error) setErr('Unable to submit inquiry. Please try again.')
-    else setDone(true)
-    setLoading(false)
+    setLoading(true)
+    setErr('')
+
+    try {
+      const res = await fetch('/api/enquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.name.trim(),
+          phone: form.phone.trim(),
+          email: form.email.trim() || null,
+          target_exam: form.category,
+          message: form.message.trim() || null,
+          source_page: '/contact',
+        }),
+      })
+
+      const data = await res.json()
+      if (!res.ok || data.error) {
+        throw new Error(data.error || 'Unable to submit inquiry. Please try again.')
+      }
+
+      setDone(true)
+    } catch (error: any) {
+      console.error('Contact submit error:', error)
+      setErr(error.message || 'Unable to submit inquiry. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

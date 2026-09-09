@@ -1,0 +1,138 @@
+import { Resend } from 'resend'
+
+const resendApiKey = process.env.RESEND_API_KEY || ''
+const resend = new Resend(resendApiKey)
+
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'Hodu Academy <onboarding@resend.dev>'
+const TO_EMAIL = process.env.RESEND_NOTIFICATION_EMAIL || 'contacthoduacademy@gmail.com'
+
+export interface EnquiryLeadData {
+  name: string
+  phone: string
+  email?: string | null
+  class_level?: string | null
+  target_exam?: string | null
+  city?: string | null
+  message?: string | null
+  source_page?: string | null
+}
+
+export async function sendEnquiryEmailNotification(data: EnquiryLeadData) {
+  try {
+    const rawPhone = data.phone.replace(/[^\d+]/g, '')
+    const whatsappPhone = rawPhone.startsWith('+') ? rawPhone.replace('+', '') : `91${rawPhone.replace(/^0+/, '')}`
+    const timestamp = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'full', timeStyle: 'short' })
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Admission & Course Enquiry</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f7f9fc; margin: 0; padding: 24px; color: #1e293b;">
+  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+    
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #7E0D0D 0%, #4a0707 100%); padding: 32px 24px; text-align: center; color: #ffffff;">
+      <h1 style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.5px;">🎓 New Student Enquiry Received</h1>
+      <p style="margin: 8px 0 0 0; font-size: 13px; opacity: 0.9; color: #fecdd3;">Hodu Academy — Your Global Classroom</p>
+    </div>
+
+    <!-- Body -->
+    <div style="padding: 28px 24px;">
+      <div style="background: #fdf2f2; border-left: 4px solid #7E0D0D; padding: 12px 16px; border-radius: 6px; margin-bottom: 24px;">
+        <p style="margin: 0; font-size: 13px; color: #7E0D0D; font-weight: 600;">
+          ⚡ High Priority Lead: Received at ${timestamp} (IST)
+        </p>
+      </div>
+
+      <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+        <tr>
+          <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; color: #64748b; width: 35%;">Student / Parent Name</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-weight: 700; color: #0f172a;">${data.name}</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; color: #64748b;">Mobile Number</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-weight: 700;">
+            <a href="tel:${data.phone}" style="color: #7E0D0D; text-decoration: none;">${data.phone}</a>
+            &nbsp;·&nbsp;
+            <a href="https://wa.me/${whatsappPhone}" style="color: #16a34a; text-decoration: none; font-weight: 600;">💬 WhatsApp</a>
+          </td>
+        </tr>
+        ${data.email ? `
+        <tr>
+          <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; color: #64748b;">Email Address</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-weight: 600;">
+            <a href="mailto:${data.email}" style="color: #0284c7; text-decoration: none;">${data.email}</a>
+          </td>
+        </tr>
+        ` : ''}
+        ${data.target_exam ? `
+        <tr>
+          <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; color: #64748b;">Target Course / Exam</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #0f172a;">${data.target_exam}</td>
+        </tr>
+        ` : ''}
+        ${data.class_level ? `
+        <tr>
+          <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; color: #64748b;">Class / Standard</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #0f172a;">${data.class_level}</td>
+        </tr>
+        ` : ''}
+        ${data.city ? `
+        <tr>
+          <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; color: #64748b;">City / Location</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #0f172a;">${data.city}</td>
+        </tr>
+        ` : ''}
+        ${data.source_page ? `
+        <tr>
+          <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; color: #64748b;">Submitted On Page</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size: 12px; color: #64748b;">${data.source_page}</td>
+        </tr>
+        ` : ''}
+      </table>
+
+      ${data.message ? `
+      <div style="margin-top: 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px;">
+        <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 700; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px;">Message / Learning Needs:</p>
+        <p style="margin: 0; font-size: 14px; color: #334155; line-height: 1.5; white-space: pre-wrap;">${data.message}</p>
+      </div>
+      ` : ''}
+
+      <div style="margin-top: 28px; text-align: center;">
+        <a href="https://hodu-academy-cms-main.vercel.app/admin/leads" style="display: inline-block; background: #7E0D0D; color: #ffffff; padding: 12px 24px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 13px; box-shadow: 0 2px 6px rgba(126, 13, 13, 0.3);">
+          View in Admin Leads Pipeline &rarr;
+        </a>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px 24px; text-align: center; font-size: 11px; color: #94a3b8;">
+      Hodu Academy Automated Notification System &bull; Jaipur, India
+    </div>
+  </div>
+</body>
+</html>
+`
+
+    const response = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [TO_EMAIL],
+      subject: `🎓 New Lead: ${data.name} (${data.target_exam || data.phone})`,
+      html: htmlContent,
+    })
+
+    if (response.error) {
+      console.error('[Resend Error]', response.error)
+      return { success: false, error: response.error }
+    }
+
+    return { success: true, data: response.data }
+  } catch (err) {
+    console.error('[Resend Exception]', err)
+    return { success: false, error: err }
+  }
+}

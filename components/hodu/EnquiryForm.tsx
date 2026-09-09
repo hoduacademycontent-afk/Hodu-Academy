@@ -2,35 +2,49 @@
 
 import { useState } from 'react'
 import { Loader, Send, CheckCircle2 } from 'lucide-react'
-import { HODU_SITE_ID } from '@/lib/hodu'
-import { createClient } from '@/lib/supabase/client'
 
 export default function EnquiryForm() {
-  const [form, setForm]   = useState({ name: '', phone: '', message: '' })
+  const [form, setForm] = useState({ name: '', phone: '', email: '', message: '' })
   const [loading, setLoading] = useState(false)
-  const [done, setDone]   = useState(false)
-  const [err, setErr]     = useState('')
+  const [done, setDone] = useState(false)
+  const [err, setErr] = useState('')
 
   function set(k: string, v: string) { setForm(f => ({ ...f, [k]: v })) }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     if (!form.name.trim() || form.phone.trim().length < 10) {
-      setErr('Please enter a valid name and 10-digit phone number.')
+      setErr('Please enter a valid name and 10-digit mobile number.')
       return
     }
-    setLoading(true); setErr('')
-    const supabase = createClient()
-    const { error } = await supabase.from('cms_leads').insert({
-      site_id: HODU_SITE_ID,
-      name:    form.name.trim(),
-      phone:   form.phone.trim(),
-      message: form.message.trim() || null,
-      status:  'new',
-    })
-    if (error) setErr('Something went wrong. Please try again.')
-    else setDone(true)
-    setLoading(false)
+    setLoading(true)
+    setErr('')
+
+    try {
+      const res = await fetch('/api/enquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.name.trim(),
+          phone: form.phone.trim(),
+          email: form.email.trim() || null,
+          message: form.message.trim() || null,
+          source_page: typeof window !== 'undefined' ? window.location.pathname : '',
+        }),
+      })
+
+      const data = await res.json()
+      if (!res.ok || data.error) {
+        throw new Error(data.error || 'Failed to submit enquiry')
+      }
+
+      setDone(true)
+    } catch (error: any) {
+      console.error('Submission error:', error)
+      setErr(error.message || 'Something went wrong. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (done) return (
@@ -38,7 +52,7 @@ export default function EnquiryForm() {
       <CheckCircle2 className="h-12 w-12 text-emerald-500 mx-auto mb-2.5 animate-bounce" />
       <h4 className="font-extrabold text-brand-navy text-base">Enquiry Submitted Successfully!</h4>
       <p className="text-brand-navy/70 text-xs mt-1 max-w-xs mx-auto">
-        Our admissions counsellor will call you within 2 hours.
+        Our admissions counsellor will call and email you within 2 hours.
       </p>
     </div>
   )
@@ -60,6 +74,12 @@ export default function EnquiryForm() {
         </div>
       </div>
       <div className="space-y-1.5">
+        <label className="text-xs font-bold text-brand-navy block">Email Address (Optional)</label>
+        <input type="email" value={form.email} onChange={e => set('email', e.target.value)}
+          placeholder="student@example.com"
+          className="w-full bg-brand-bg/60 border border-brand-border rounded-xl px-4 py-2.5 text-xs text-brand-navy outline-none focus:border-brand-maroon focus:ring-2 focus:ring-brand-maroon/10 transition-all" />
+      </div>
+      <div className="space-y-1.5">
         <label className="text-xs font-bold text-brand-navy block">Message / Target Course (Optional)</label>
         <textarea value={form.message} onChange={e => set('message', e.target.value)}
           placeholder="e.g. Interested in IGCSE Class 10 Physics or JEE Main batch..."
@@ -74,3 +94,4 @@ export default function EnquiryForm() {
     </form>
   )
 }
+
