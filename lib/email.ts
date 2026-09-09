@@ -3,8 +3,8 @@ import { Resend } from 'resend'
 const resendApiKey = process.env.RESEND_API_KEY || ''
 const resend = new Resend(resendApiKey)
 
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'Hodu Academy <onboarding@resend.dev>'
-const TO_EMAIL = process.env.RESEND_NOTIFICATION_EMAIL || 'contacthoduacademy@gmail.com'
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'Hodu Academy <xyz@email.hoduacademy.com>'
+const TO_EMAIL = process.env.RESEND_NOTIFICATION_EMAIL || 'hoduacademycontenttwo@gmail.com'
 
 export interface EnquiryLeadData {
   name: string
