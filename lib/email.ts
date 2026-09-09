@@ -17,8 +17,32 @@ export interface EnquiryLeadData {
   source_page?: string | null
 }
 
-export async function sendEnquiryEmailNotification(data: EnquiryLeadData) {
+export async function sendEnquiryEmailNotification(data: EnquiryLeadData, recipientOverride?: string) {
   try {
+    let recipient = recipientOverride?.trim()
+
+    if (!recipient) {
+      try {
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bgaidfuzvcrjbxmpfvym.supabase.co'
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+        const { createClient: createAdminClient } = await import('@supabase/supabase-js')
+        const supabase = createAdminClient(supabaseUrl, supabaseKey)
+        const { data: site } = await supabase
+          .from('cms_sites')
+          .select('email, owner_email')
+          .eq('id', 'a1b2c3d4-1111-1111-1111-000000000002')
+          .single()
+
+        if (site?.email && site.email.includes('@')) {
+          recipient = site.email.trim()
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
+    const finalToEmail = recipient || TO_EMAIL
+
     const rawPhone = data.phone.replace(/[^\d+]/g, '')
     const whatsappPhone = rawPhone.startsWith('+') ? rawPhone.replace('+', '') : `91${rawPhone.replace(/^0+/, '')}`
     const timestamp = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'full', timeStyle: 'short' })
@@ -120,19 +144,72 @@ export async function sendEnquiryEmailNotification(data: EnquiryLeadData) {
 
     const response = await resend.emails.send({
       from: FROM_EMAIL,
-      to: [TO_EMAIL],
+      to: [finalToEmail],
       subject: `🎓 New Lead: ${data.name} (${data.target_exam || data.phone})`,
       html: htmlContent,
     })
 
     if (response.error) {
       console.error('[Resend Error]', response.error)
-      return { success: false, error: response.error }
+      return { success: false, error: response.error, recipient: finalToEmail }
     }
 
-    return { success: true, data: response.data }
+    return { success: true, data: response.data, recipient: finalToEmail }
   } catch (err) {
     console.error('[Resend Exception]', err)
     return { success: false, error: err }
+  }
+}
+
+export async function sendTestNotificationEmail(recipientEmail: string) {
+  try {
+    const timestamp = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'full', timeStyle: 'short' })
+    const targetEmail = recipientEmail.trim() || TO_EMAIL
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Resend Notification Test</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f7f9fc; margin: 0; padding: 24px; color: #1e293b;">
+  <div style="max-width: 540px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+    <div style="background: linear-gradient(135deg, #7E0D0D 0%, #4a0707 100%); padding: 28px 24px; text-align: center; color: #ffffff;">
+      <h1 style="margin: 0; font-size: 20px; font-weight: 800;">✅ Resend Notification Setup Verified</h1>
+      <p style="margin: 6px 0 0 0; font-size: 13px; color: #fecdd3;">Hodu Academy Admin Portal</p>
+    </div>
+    <div style="padding: 24px;">
+      <p style="font-size: 14px; line-height: 1.6; color: #334155; margin-top: 0;">
+        This is a test notification confirming that your admin lead notification email is successfully connected and receiving emails from <strong>Hodu Academy</strong>.
+      </p>
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin: 16px 0;">
+        <p style="margin: 0; font-size: 13px; color: #475569;"><strong>Configured Recipient:</strong> ${targetEmail}</p>
+        <p style="margin: 4px 0 0 0; font-size: 13px; color: #475569;"><strong>Verified Sender:</strong> ${FROM_EMAIL}</p>
+        <p style="margin: 4px 0 0 0; font-size: 13px; color: #475569;"><strong>Dispatched At:</strong> ${timestamp} (IST)</p>
+      </div>
+      <p style="font-size: 13px; color: #64748b;">
+        All future admissions, quick callback enquiries, and contact page messages submitted on the website will be forwarded directly to this email address.
+      </p>
+    </div>
+  </div>
+</body>
+</html>
+`
+
+    const response = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [targetEmail],
+      subject: `✅ Test Notification: Hodu Academy Lead Email Delivery Verified`,
+      html: htmlContent,
+    })
+
+    if (response.error) {
+      return { success: false, error: response.error }
+    }
+
+    return { success: true, data: response.data, recipient: targetEmail }
+  } catch (err: any) {
+    return { success: false, error: err.message || err }
   }
 }
