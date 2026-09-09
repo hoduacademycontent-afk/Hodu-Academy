@@ -47,15 +47,15 @@ const COLOR_PRESETS = [
 ]
 
 /**
- * Formats Excel percentages, decimals, and custom strings into clean human-readable text (e.g. 0.952 -> 95.2%)
+ * Formats Excel percentages, decimals, ratios, and custom strings into clean human-readable text (e.g. 0.952 -> 95.2%)
  */
 export function formatExcelScore(scoreRaw: any): string {
   if (scoreRaw === undefined || scoreRaw === null) return '95%'
   const str = String(scoreRaw).trim()
   if (!str) return '95%'
 
-  // If already formatted like "AIR 14", "710/720", "8x A*"
-  if (/(?:AIR|Rank|#|\/|A\*)/i.test(str)) {
+  // If already formatted like "AIR 14", "710/720", "8x A*", "44/45 DP", "99.85 %ile"
+  if (/(?:AIR|Rank|#|\/|A\*|DP|%ile|Percentile)/i.test(str)) {
     return str
   }
 
@@ -67,10 +67,14 @@ export function formatExcelScore(scoreRaw: any): string {
       const pct = parseFloat((numVal * 100).toFixed(2))
       return `${pct}%`
     }
-    // Clean floating point errors like 95.20000000000001
+    // Standard percentage float cleanup (e.g. 95.20000000000001 -> 95.2%)
     if (numVal > 1 && numVal <= 100) {
       const rounded = parseFloat(numVal.toFixed(2))
       return `${rounded}%`
+    }
+    // High numeric scores (e.g. NEET 680, JEE 290, CBSE 492)
+    if (numVal > 100) {
+      return String(Math.round(numVal))
     }
   }
 
@@ -81,10 +85,11 @@ export function formatExcelScore(scoreRaw: any): string {
  * Robust score parsing and numeric conversion for rank evaluation.
  * Supports:
  * - Percentages: 99.6%, 98.4, 0.952
- * - Marks Ratio: 710/720, 44/45, 98/100
+ * - Marks Ratio: 710/720, 44/45, 98/100, 492/500
  * - AIR / Rank: AIR 1, Rank 3, #1
  * - Letter Grades: 8x A*, 7 A*
  * - Percentiles: 99.85 %ile
+ * - Absolute marks: 680, 495
  */
 export function parseScoreToNumeric(scoreRaw: any): number {
   if (scoreRaw === undefined || scoreRaw === null) return 0
@@ -95,10 +100,10 @@ export function parseScoreToNumeric(scoreRaw: any): number {
   const airMatch = str.match(/(?:AIR|Rank|#)\s*(\d+)/i)
   if (airMatch) {
     const rankNum = parseFloat(airMatch[1])
-    return 10000 - rankNum // Lower rank number = higher score (Rank 1 -> 9999, Rank 2 -> 9998)
+    return 100000 - rankNum // Lower rank number = higher score (Rank 1 -> 99999, Rank 2 -> 99998)
   }
 
-  // 2. Ratio check: "710/720", "44/45", "98/100"
+  // 2. Ratio check: "710/720", "44/45", "492/500", "98/100"
   const ratioMatch = str.match(/(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)/)
   if (ratioMatch) {
     const num = parseFloat(ratioMatch[1])
@@ -123,6 +128,265 @@ export function parseScoreToNumeric(scoreRaw: any): number {
   }
 
   return 0
+}
+
+/**
+ * Intelligent Excel / CSV parser that extracts student names, scores, photos, and designations
+ * from ANY arbitrary spreadsheet layout, multiple sheets, or column naming conventions.
+ */
+export function parseExcelSpreadsheet(workbook: XLSX.WorkBook): {
+  students: Array<{ name: string; score: string; photo: string; designation: string }>;
+  detectedSheet: string;
+  matchedColumns: { name: string; score: string; photo?: string; designation?: string };
+} {
+  if (!workbook || !workbook.SheetNames || workbook.SheetNames.length === 0) {
+    throw new Error('Workbook contains no sheets.')
+  }
+
+  // 1. Pick the best sheet (e.g. named Achievers, Results, Students, Toppers, or first sheet)
+  let selectedSheetName = workbook.SheetNames[0]
+  for (const name of workbook.SheetNames) {
+    if (/(?:achiever|result|student|topper|performer|ranker|data|score|merit)/i.test(name)) {
+      selectedSheetName = name
+      break
+    }
+  }
+
+  const ws = workbook.Sheets[selectedSheetName]
+  if (!ws) throw new Error(`Sheet "${selectedSheetName}" is empty.`)
+
+  // Convert to 2D array of rows
+  const matrix: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' })
+  if (!matrix || matrix.length === 0) {
+    throw new Error('Sheet has no data rows.')
+  }
+
+  // 2. Identify the Header Row by scanning the first 25 rows
+  let bestHeaderRowIdx = -1
+  let bestHeaderScore = 0
+
+  const headerKeywords = [
+    'name', 'student', 'candidate', 'scholar', 'learner', 'pupil', 'applicant', 'person',
+    'score', 'mark', 'percentage', 'percentile', 'percent', 'rank', 'air', 'grade', 'result', 'total', 'cgpa', 'gpa',
+    'photo', 'image', 'picture', 'pic', 'avatar', 'link', 'url',
+    'school', 'stream', 'branch', 'batch', 'college', 'designation', 'title', 'subject', 'remark', 'note',
+    'sno', 'srno', 'slno', 'serial', 'roll'
+  ]
+
+  for (let r = 0; r < Math.min(matrix.length, 25); r++) {
+    const row = matrix[r]
+    if (!Array.isArray(row) || row.length === 0) continue
+
+    let matchCount = 0
+    for (const cell of row) {
+      if (!cell) continue
+      const cellStr = String(cell).trim().toLowerCase().replace(/[^a-z0-9]/g, '')
+      if (headerKeywords.some(kw => cellStr.includes(kw))) {
+        matchCount++
+      }
+    }
+
+    if (matchCount > bestHeaderScore) {
+      bestHeaderScore = matchCount
+      bestHeaderRowIdx = r
+    }
+  }
+
+  // Fallback: first row with at least 2 non-empty text cells
+  if (bestHeaderRowIdx === -1 || bestHeaderScore === 0) {
+    for (let r = 0; r < Math.min(matrix.length, 10); r++) {
+      const row = matrix[r]
+      if (Array.isArray(row) && row.filter(c => String(c || '').trim().length > 0).length >= 2) {
+        bestHeaderRowIdx = r
+        break
+      }
+    }
+  }
+
+  if (bestHeaderRowIdx === -1) {
+    bestHeaderRowIdx = 0
+  }
+
+  const headerRow = (matrix[bestHeaderRowIdx] || []).map(c => String(c || '').trim())
+  const dataRows = matrix.slice(bestHeaderRowIdx + 1)
+
+  // 3. Resolve Column Indexes
+  let nameColIdx = -1
+  let scoreColIdx = -1
+  let photoColIdx = -1
+  let designationColIdx = -1
+
+  const ignoreForNameRegex = /^(?:s\.?\s*no|sr\.?\s*no|sl\.?\s*no|serial|no\.?|id|roll|roll\s*no|index|reg(?:istration)?\s*no|adm(?:ission)?\s*no)$/i
+  const nonStudentNameRegex = /(?:father|mother|parent|school|teacher|institute|college|faculty|center|branch|file|sheet|class|subject|exam)/i
+
+  // Pass 1: Header name matching
+  headerRow.forEach((colHeader, idx) => {
+    if (!colHeader) return
+    const raw = colHeader.trim()
+    const norm = raw.toLowerCase().replace(/[^a-z0-9]/g, '')
+
+    // If it's a serial/ID column, never pick it as student name
+    if (ignoreForNameRegex.test(raw) || ['sno', 'srno', 'slno', 'serialno', 'rollno', 'rollnumber', 'id', 'studentid', 'index'].includes(norm)) {
+      return
+    }
+
+    // Name column matching
+    if (nameColIdx === -1) {
+      const isName = ['studentname', 'candidatename', 'fullname', 'student', 'nameofstudent', 'studentsname', 'learnername', 'pupilname', 'name', 'applicantname', 'applicant', 'childname', 'firstlastname', 'firstname'].includes(norm)
+        || (/name/i.test(raw) && !nonStudentNameRegex.test(raw))
+        || (/^(?:student|candidate|scholar|learner|pupil)$/i.test(raw))
+
+      if (isName) {
+        nameColIdx = idx
+        return
+      }
+    }
+
+    // Score / Marks column matching
+    if (scoreColIdx === -1) {
+      const isScore = ['marks', 'score', 'percentage', 'percentile', 'percent', 'pct', 'total', 'rank', 'air', 'allindiarank', 'grade', 'marksobtained', 'totalmarks', 'markspercent', 'markscore', 'cgpa', 'gpa', 'scoredmarks', 'marksscore', 'result', 'marksoutoff500', 'neetmarks', 'jeemarks', 'cbsemarks', 'boardscore', 'markspercentage', 'percentagepct', 'scoremarks', 'aggregate', 'finalscore', 'securedmarks', 'markssecured'].includes(norm)
+        || /(?:marks?|scores?|percent(?:age)?|percentile|%|rank|air|grade|cgpa|gpa|total)/i.test(raw)
+
+      if (isScore) {
+        scoreColIdx = idx
+        return
+      }
+    }
+
+    // Photo column matching
+    if (photoColIdx === -1) {
+      const isPhoto = ['photo', 'photourl', 'image', 'imageurl', 'pic', 'picture', 'avatar', 'photolink', 'imagelink', 'profilepic', 'url', 'link', 'drive', 'googlelink', 'drivelink', 'studentphoto'].includes(norm)
+        || /(?:photo|image|picture|pic|avatar|img|drivelink)/i.test(raw)
+
+      if (isPhoto) {
+        photoColIdx = idx
+        return
+      }
+    }
+
+    // Designation / School / Subtitle column matching
+    if (designationColIdx === -1) {
+      const isDesig = ['designation', 'school', 'stream', 'branch', 'batch', 'title', 'college', 'subject', 'remark', 'note', 'subtext', 'category', 'center', 'board', 'exam', 'achievements', 'subtitle', 'tagline', 'description', 'city'].includes(norm)
+        || /(?:designation|school|stream|branch|batch|title|college|subject|remark|note|subtext|board|center|exam)/i.test(raw)
+
+      if (isDesig) {
+        designationColIdx = idx
+        return
+      }
+    }
+  })
+
+  // Pass 2: Content-based heuristic inspection if columns weren't identified
+  if (nameColIdx === -1 || scoreColIdx === -1) {
+    const colStats: { [colIdx: number]: { textCount: number; numberCount: number; urlCount: number } } = {}
+
+    for (const row of dataRows.slice(0, 15)) {
+      if (!Array.isArray(row)) continue
+      row.forEach((cell, cIdx) => {
+        if (!colStats[cIdx]) colStats[cIdx] = { textCount: 0, numberCount: 0, urlCount: 0 }
+        const val = String(cell || '').trim()
+        if (!val) return
+        if (/^https?:\/\//i.test(val)) {
+          colStats[cIdx].urlCount++
+        } else if (/^(?:\d+(?:\.\d+)?%?|\d+\/\d+|AIR\s*\d+|#\d+|\d+x\s*A\*)$/i.test(val) || !isNaN(parseFloat(val.replace('%', '')))) {
+          colStats[cIdx].numberCount++
+        } else if (/^[A-Za-z\s.'-]{2,40}$/.test(val)) {
+          colStats[cIdx].textCount++
+        }
+      })
+    }
+
+    // Pick best text column for student name
+    if (nameColIdx === -1) {
+      let maxText = -1
+      Object.entries(colStats).forEach(([cStr, stats]) => {
+        const c = Number(cStr)
+        if (c === scoreColIdx || c === photoColIdx) return
+        const header = headerRow[c] || ''
+        if (ignoreForNameRegex.test(header)) return
+        if (stats.textCount > maxText && stats.textCount > stats.numberCount) {
+          maxText = stats.textCount
+          nameColIdx = c
+        }
+      })
+    }
+
+    // Pick best numeric / score column
+    if (scoreColIdx === -1) {
+      let maxNum = -1
+      Object.entries(colStats).forEach(([cStr, stats]) => {
+        const c = Number(cStr)
+        if (c === nameColIdx || c === photoColIdx) return
+        if (stats.numberCount > maxNum) {
+          maxNum = stats.numberCount
+          scoreColIdx = c
+        }
+      })
+    }
+  }
+
+  // Fallbacks
+  if (nameColIdx === -1) {
+    nameColIdx = headerRow.findIndex((h, idx) => !ignoreForNameRegex.test(h) && idx !== scoreColIdx && idx !== photoColIdx)
+    if (nameColIdx === -1) nameColIdx = 0
+  }
+
+  if (scoreColIdx === -1) {
+    scoreColIdx = headerRow.findIndex((_, idx) => idx !== nameColIdx && idx !== photoColIdx)
+    if (scoreColIdx === -1) scoreColIdx = nameColIdx + 1
+  }
+
+  // 4. Extract and Clean Students
+  const students: Array<{ name: string; score: string; photo: string; designation: string }> = []
+
+  for (let rIdx = 0; rIdx < dataRows.length; rIdx++) {
+    const row = dataRows[rIdx]
+    if (!Array.isArray(row) || row.length === 0) continue
+
+    let rawName = String(row[nameColIdx] || '').trim()
+    // Skip empty rows, totals, averages, or subheaders
+    if (!rawName) continue
+    if (/^(?:total|average|avg|summary|batch|grand\s*total|count|rank|sno|srno)$/i.test(rawName)) continue
+
+    // If rawName is just a number (e.g. "1", "2") and another text cell exists, rescue the name
+    if (/^\d+$/.test(rawName)) {
+      const altTextCell = row.find((c, idx) => idx !== nameColIdx && idx !== scoreColIdx && /^[A-Za-z\s.'-]{2,40}$/.test(String(c || '').trim()))
+      if (altTextCell) {
+        rawName = String(altTextCell).trim()
+      } else {
+        continue // Skip pure serial number row with no name
+      }
+    }
+
+    const rawScore = row[scoreColIdx] !== undefined ? row[scoreColIdx] : ''
+    let rawPhoto = photoColIdx !== -1 ? String(row[photoColIdx] || '').trim() : ''
+
+    // Auto-detect URL in any row cell if photo column was empty
+    if (!rawPhoto) {
+      const urlCell = row.find(c => typeof c === 'string' && /^https?:\/\/.+(?:\.jpg|\.png|\.webp|\.jpeg|googleusercontent|drive\.google)/i.test(c.trim()))
+      if (urlCell) rawPhoto = String(urlCell).trim()
+    }
+
+    const rawDesig = designationColIdx !== -1 ? String(row[designationColIdx] || '').trim() : ''
+
+    students.push({
+      name: rawName,
+      score: formatExcelScore(rawScore),
+      photo: rawPhoto ? normalizeImageUrl(rawPhoto) : '',
+      designation: rawDesig,
+    })
+  }
+
+  return {
+    students,
+    detectedSheet: selectedSheetName,
+    matchedColumns: {
+      name: headerRow[nameColIdx] || `Column ${nameColIdx + 1}`,
+      score: headerRow[scoreColIdx] || `Column ${scoreColIdx + 1}`,
+      photo: photoColIdx !== -1 ? (headerRow[photoColIdx] || `Column ${photoColIdx + 1}`) : undefined,
+      designation: designationColIdx !== -1 ? (headerRow[designationColIdx] || `Column ${designationColIdx + 1}`) : undefined,
+    },
+  }
 }
 
 /**
@@ -618,40 +882,23 @@ export default function AcademicDecksManager() {
     const reader = new FileReader()
     reader.onload = (evt) => {
       try {
-        const bstr = evt.target?.result
-        const wb = XLSX.read(bstr, { type: 'binary' })
-        const wsName = wb.SheetNames[0]
-        const ws = wb.Sheets[wsName]
-        const rawJson: any[] = XLSX.utils.sheet_to_json(ws, { defval: '' })
-
-        if (!rawJson || rawJson.length === 0) {
-          alert('Uploaded file is empty or has no valid rows.')
+        const buffer = evt.target?.result as ArrayBuffer
+        if (!buffer) {
+          alert('Failed to read the file contents.')
           return
         }
 
-        // Map column names flexibly
-        const parsedStudents = rawJson.map((row: any, rIdx: number) => {
-          const name = row['Student Name'] || row['Name'] || row['student_name'] || row['student'] || row['Student'] || Object.values(row)[0] || `Student ${rIdx + 1}`
-          const scoreRaw = row['Marks / Score'] ?? row['Marks'] ?? row['Score'] ?? row['Rank'] ?? row['Percentage'] ?? row['marks'] ?? row['score'] ?? row['rank'] ?? '95%'
-          const photo = row['Photo URL (Optional)'] || row['Photo URL'] || row['Photo'] || row['Image URL'] || row['Image'] || row['photo'] || row['photo_url'] || ''
-          const designation = row['Designation / Note (Optional)'] || row['Designation'] || row['Title'] || row['designation'] || ''
+        const wb = XLSX.read(buffer, { type: 'array' })
+        const parsed = parseExcelSpreadsheet(wb)
 
-          return {
-            name: String(name).trim(),
-            score: formatExcelScore(scoreRaw),
-            photo: String(photo).trim(),
-            designation: String(designation).trim(),
-          }
-        }).filter(s => s.name)
-
-        if (parsedStudents.length === 0) {
-          alert('Could not find any student records. Please check the Excel column format.')
+        if (!parsed.students || parsed.students.length === 0) {
+          alert('Could not find any student records. Please ensure your sheet contains student names and marks/scores.')
           return
         }
 
         // Auto-evaluate and sort rank-wise (respecting has_spotlight_topper setting)!
         const hasTop = editingDeck.has_spotlight_topper !== false
-        const evaluated = autoEvaluateAndSortStudents(parsedStudents, hasTop)
+        const evaluated = autoEvaluateAndSortStudents(parsed.students, hasTop)
 
         setEditingDeck((prev: any) => ({
           ...prev,
@@ -659,18 +906,21 @@ export default function AcademicDecksManager() {
           performers: evaluated.performers,
         }))
 
+        const desigInfo = parsed.matchedColumns.designation ? `, Subtext: [${parsed.matchedColumns.designation}]` : ''
+        const photoInfo = parsed.matchedColumns.photo ? `, Photo: [${parsed.matchedColumns.photo}]` : ''
+
         const noticeMsg = hasTop
-          ? `✅ Evaluated ${parsedStudents.length} students from Excel!\n• Top Ranker: ${evaluated.topRanker.name} (${evaluated.topRanker.score})\n• Achievers: ${evaluated.performers.length} students in rank order.`
-          : `✅ Evaluated ${parsedStudents.length} students from Excel into full Achievers Grid!`
+          ? `✅ Successfully loaded ${parsed.students.length} students from Sheet "${parsed.detectedSheet}"!\n• Mapped Columns: Name → [${parsed.matchedColumns.name}], Score → [${parsed.matchedColumns.score}]${desigInfo}${photoInfo}\n• Top Ranker: ${evaluated.topRanker.name} (${evaluated.topRanker.score})\n• Achievers Grid: ${evaluated.performers.length} students organized in rank order.`
+          : `✅ Successfully loaded ${parsed.students.length} students from Sheet "${parsed.detectedSheet}" into full Achievers Grid!\n• Mapped Columns: Name → [${parsed.matchedColumns.name}], Score → [${parsed.matchedColumns.score}]${desigInfo}${photoInfo}`
 
         setBulkNotice(noticeMsg)
-        setTimeout(() => setBulkNotice(null), 6000)
-      } catch (err) {
+        setTimeout(() => setBulkNotice(null), 9000)
+      } catch (err: any) {
         console.error('Error parsing Excel:', err)
-        alert('Failed to parse the Excel file. Please ensure it is a valid .xlsx or .csv file.')
+        alert(`Failed to parse the file: ${err?.message || 'Unknown error'}. Please check that the file is a valid .xlsx, .xls, or .csv.`)
       }
     }
-    reader.readAsBinaryString(file)
+    reader.readAsArrayBuffer(file)
     e.target.value = ''
   }
 
