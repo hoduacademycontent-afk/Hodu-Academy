@@ -14,7 +14,7 @@ brand
 
 ## Product Purpose
 
-Hodu Academy's public website exists to convert visitors into enrolled students. It does this by establishing academic credibility, showcasing toppers and results, presenting courses clearly with pricing and features, and making enquiry/enrollment effortless. The admin CMS allows staff to manage course listings, leads, notices, faculty, and testimonials without touching code.
+Hodu Academy's public website exists to convert visitors into enrolled students. It does this by establishing academic credibility, showcasing toppers and results, presenting courses clearly with pricing and features, and making enquiry/enrollment effortless. The admin CMS allows staff to manage course listings, leads, notices, faculty, and testimonials without touching code
 
 ## Brand Personality
 
