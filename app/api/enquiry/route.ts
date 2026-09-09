@@ -101,3 +101,55 @@ export async function POST(req: NextRequest) {
   }
 }
 
+export async function DELETE(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url)
+    const queryId = searchParams.get('id')
+    
+    let idsToDelete: string[] = []
+    if (queryId) {
+      idsToDelete = [queryId]
+    } else {
+      try {
+        const body = await req.json()
+        if (Array.isArray(body.ids)) {
+          idsToDelete = body.ids
+        } else if (body.id) {
+          idsToDelete = [body.id]
+        }
+      } catch {
+        // empty body
+      }
+    }
+
+    if (!idsToDelete.length) {
+      return NextResponse.json({ error: 'No lead ID provided for deletion.' }, { status: 400 })
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bgaidfuzvcrjbxmpfvym.supabase.co'
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+    const { createClient: createAdminClient } = await import('@supabase/supabase-js')
+    const supabase = createAdminClient(supabaseUrl, supabaseKey)
+
+    const { error } = await supabase
+      .from('cms_leads')
+      .delete()
+      .in('id', idsToDelete)
+
+    if (error) {
+      console.error('[Delete Leads Error]:', error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({
+      success: true,
+      deleted_count: idsToDelete.length,
+      message: `Successfully deleted ${idsToDelete.length} lead(s).`
+    })
+  } catch (err: any) {
+    console.error('[Delete Leads Exception]:', err)
+    return NextResponse.json({ error: err.message || 'Failed to delete leads.' }, { status: 500 })
+  }
+}
+
+

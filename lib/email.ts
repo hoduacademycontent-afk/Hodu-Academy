@@ -4,7 +4,7 @@ const resendApiKey = process.env.RESEND_API_KEY || ''
 const resend = new Resend(resendApiKey)
 
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'Hodu Academy <xyz@email.hoduacademy.com>'
-const TO_EMAIL = process.env.RESEND_NOTIFICATION_EMAIL || 'hoduacademycontenttwo@gmail.com'
+const TO_EMAIL = process.env.RESEND_NOTIFICATION_EMAIL || 'thehoduacademy@gmail.com'
 
 export interface EnquiryLeadData {
   name: string

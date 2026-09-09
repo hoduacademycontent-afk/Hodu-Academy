@@ -4,7 +4,19 @@ import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import AdminLayout from '@/components/admin/AdminLayout'
 import Modal from '@/components/admin/Modal'
-import { Phone, MessageCircle, Mail, Download, Search, NotebookPen, CalendarClock, ExternalLink, Globe } from 'lucide-react'
+import {
+  Phone,
+  MessageCircle,
+  Mail,
+  Download,
+  Search,
+  NotebookPen,
+  CalendarClock,
+  ExternalLink,
+  Globe,
+  Trash2,
+  AlertTriangle
+} from 'lucide-react'
 
 const SITE_ID = 'a1b2c3d4-1111-1111-1111-000000000002'
 
@@ -49,13 +61,16 @@ function extractSource(lead: any): string {
 
 export default function LeadsPage() {
   const supabase = createClient()
-  const [leads, setLeads]     = useState<any[]>([])
-  const [filter, setFilter]   = useState('all')
-  const [search, setSearch]   = useState('')
-  const [detail, setDetail]   = useState<any | null>(null)
-  const [notes, setNotes]     = useState('')
-  const [followUp, setFollowUp] = useState('')
+  const [leads, setLeads]             = useState<any[]>([])
+  const [filter, setFilter]           = useState('all')
+  const [search, setSearch]           = useState('')
+  const [detail, setDetail]           = useState<any | null>(null)
+  const [notes, setNotes]             = useState('')
+  const [followUp, setFollowUp]       = useState('')
   const [savingDetail, setSavingDetail] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [deleteTarget, setDeleteTarget] = useState<{ type: 'single' | 'bulk'; lead?: any; count?: number } | null>(null)
+  const [isDeleting, setIsDeleting]   = useState(false)
 
   async function load() {
     const { data } = await supabase
@@ -90,6 +105,38 @@ export default function LeadsPage() {
     load()
   }
 
+  // Deletion functions
+  async function performDelete() {
+    if (!deleteTarget) return
+    setIsDeleting(true)
+
+    try {
+      if (deleteTarget.type === 'single' && deleteTarget.lead) {
+        const id = deleteTarget.lead.id
+        await fetch(`/api/enquiry?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
+        await supabase.from('cms_leads').delete().eq('id', id)
+        
+        setSelectedIds(prev => prev.filter(i => i !== id))
+        if (detail?.id === id) setDetail(null)
+      } else if (deleteTarget.type === 'bulk' && selectedIds.length > 0) {
+        await fetch('/api/enquiry', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ids: selectedIds })
+        })
+        await supabase.from('cms_leads').delete().in('id', selectedIds)
+        
+        setSelectedIds([])
+      }
+    } catch (err) {
+      console.error('Delete error:', err)
+    } finally {
+      setIsDeleting(false)
+      setDeleteTarget(null)
+      load()
+    }
+  }
+
   const counts = useMemo(() => leads.reduce((acc, l) => {
     acc[l.status] = (acc[l.status] ?? 0) + 1
     return acc
@@ -108,6 +155,24 @@ export default function LeadsPage() {
     }
     return list
   }, [leads, filter, search])
+
+  const allVisibleSelected = visible.length > 0 && visible.every(l => selectedIds.includes(l.id))
+
+  function toggleSelectAll() {
+    if (allVisibleSelected) {
+      const visibleIdSet = new Set(visible.map(l => l.id))
+      setSelectedIds(prev => prev.filter(id => !visibleIdSet.has(id)))
+    } else {
+      const combined = Array.from(new Set([...selectedIds, ...visible.map(l => l.id)]))
+      setSelectedIds(combined)
+    }
+  }
+
+  function toggleSelectLead(id: string) {
+    setSelectedIds(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    )
+  }
 
   function exportCsv() {
     const headers = ['Name', 'Phone', 'Email', 'Target Exam', 'Class', 'City', 'Source Page', 'Status', 'Follow-up Date', 'Notes', 'Message', 'Created At']
@@ -147,9 +212,21 @@ export default function LeadsPage() {
           <h2 className="text-lg font-bold text-[#1B2A44]">Leads Pipeline</h2>
           <p className="text-xs text-[#64748b]">{leads.length} total enquiries · {conversionRate}% enrolled conversion</p>
         </div>
-        <button onClick={exportCsv} className="flex items-center gap-2 border border-[#F3DCDC] hover:border-[#7E0D0D] hover:text-[#7E0D0D] text-[#1B2A44] text-sm font-semibold px-4 py-2 rounded-xl transition-colors bg-white shadow-xs">
-          <Download size={15} /> Export CSV
-        </button>
+        
+        <div className="flex items-center gap-2.5">
+          {selectedIds.length > 0 && (
+            <button
+              onClick={() => setDeleteTarget({ type: 'bulk', count: selectedIds.length })}
+              className="flex items-center gap-1.5 bg-red-50 text-red-700 border border-red-200 hover:bg-red-600 hover:text-white text-xs font-bold px-3.5 py-2 rounded-xl transition-colors shadow-xs"
+            >
+              <Trash2 size={14} /> Delete Selected ({selectedIds.length})
+            </button>
+          )}
+
+          <button onClick={exportCsv} className="flex items-center gap-2 border border-[#F3DCDC] hover:border-[#7E0D0D] hover:text-[#7E0D0D] text-[#1B2A44] text-sm font-semibold px-4 py-2 rounded-xl transition-colors bg-white shadow-xs">
+            <Download size={15} /> Export CSV
+          </button>
+        </div>
       </div>
 
       {/* Pipeline summary cards */}
@@ -163,10 +240,10 @@ export default function LeadsPage() {
         ))}
       </div>
 
-      {/* Search + reset filter */}
+      {/* Search + selection toolbar */}
       <div className="flex flex-wrap items-center gap-3 mb-5">
         <div className="flex items-center gap-2 flex-1 min-w-[220px] border border-[#F3DCDC] rounded-xl px-3 py-2 bg-white focus-within:border-[#7E0D0D]">
-          <Search size={14} className="#64748b shrink-0" />
+          <Search size={14} className="text-[#64748b] shrink-0" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -186,6 +263,15 @@ export default function LeadsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-[#F3DCDC] bg-[#FDF5F5]">
+                <th className="w-10 px-3 py-3 text-center">
+                  <input
+                    type="checkbox"
+                    checked={allVisibleSelected}
+                    onChange={toggleSelectAll}
+                    title="Select all visible leads"
+                    className="w-4 h-4 rounded text-[#7E0D0D] focus:ring-[#7E0D0D] border-gray-300 cursor-pointer"
+                  />
+                </th>
                 {['Student / Contact', 'Email Address', 'Exam / Curriculum', 'City & Source', 'Status', 'Follow-up', 'Date', 'Actions'].map((h) => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wider">{h}</th>
                 ))}
@@ -198,9 +284,20 @@ export default function LeadsPage() {
                 const source = extractSource(l)
                 const rawPhone = (l.phone ?? '').replace(/[^\d+]/g, '')
                 const whatsappPhone = rawPhone.startsWith('+') ? rawPhone.replace('+', '') : `91${rawPhone.replace(/^0+/, '')}`
+                const isSelected = selectedIds.includes(l.id)
 
                 return (
-                  <tr key={l.id} className="border-b border-[#F3DCDC] last:border-0 hover:bg-[#FDF5F5]/60 transition-colors">
+                  <tr key={l.id} className={`border-b border-[#F3DCDC] last:border-0 transition-colors ${isSelected ? 'bg-red-50/40' : 'hover:bg-[#FDF5F5]/60'}`}>
+                    {/* Checkbox */}
+                    <td className="w-10 px-3 py-3 text-center">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleSelectLead(l.id)}
+                        className="w-4 h-4 rounded text-[#7E0D0D] focus:ring-[#7E0D0D] border-gray-300 cursor-pointer"
+                      />
+                    </td>
+
                     {/* Name & Phone */}
                     <td className="px-4 py-3">
                       <div>
@@ -241,7 +338,7 @@ export default function LeadsPage() {
                     <td className="px-4 py-3 text-xs">
                       <p className="text-[#1B2A44]">{l.city ?? 'Jaipur'}</p>
                       {source && (
-                        <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded text-[10px] bg-neutral-100 text-neutral-600 border border-neutral-200">
+                        <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded text-[10px] bg-neutral-100 text-neutral-600 border border-neutral-200 max-w-[140px] truncate" title={source}>
                           {source}
                         </span>
                       )}
@@ -271,7 +368,7 @@ export default function LeadsPage() {
 
                     {/* Actions */}
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
                         <select
                           value={l.status}
                           onChange={(e) => updateStatus(l.id, e.target.value)}
@@ -283,6 +380,13 @@ export default function LeadsPage() {
                         <button onClick={() => openDetail(l)} className="text-xs px-2.5 py-1 border border-[#F3DCDC] rounded-lg text-[#1B2A44] hover:bg-[#7E0D0D] hover:text-white transition-colors">
                           Open
                         </button>
+                        <button
+                          onClick={() => setDeleteTarget({ type: 'single', lead: l })}
+                          title="Delete Lead"
+                          className="p-1 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <Trash2 size={14} />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -293,6 +397,48 @@ export default function LeadsPage() {
           {visible.length === 0 && <p className="text-center text-[#94a3b8] py-12 text-sm">No leads match the current filter.</p>}
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteTarget && (
+        <Modal
+          title={deleteTarget.type === 'bulk' ? `Delete ${deleteTarget.count} Leads` : 'Delete Enquiry'}
+          onClose={() => !isDeleting && setDeleteTarget(null)}
+        >
+          <div className="space-y-4">
+            <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4">
+              <AlertTriangle className="text-red-600 shrink-0 mt-0.5" size={20} />
+              <div>
+                <p className="text-sm font-bold text-red-900">
+                  {deleteTarget.type === 'bulk'
+                    ? `Are you sure you want to permanently delete these ${deleteTarget.count} selected lead(s)?`
+                    : `Are you sure you want to permanently delete the enquiry from "${deleteTarget.lead?.name}"?`}
+                </p>
+                <p className="text-xs text-red-700 mt-1">
+                  This action cannot be undone. The enquiry will be removed from your database.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                disabled={isDeleting}
+                className="flex-1 border border-[#F3DCDC] text-[#1B2A44] py-2.5 rounded-xl text-sm font-semibold hover:bg-neutral-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={performDelete}
+                disabled={isDeleting}
+                className="flex-1 bg-red-600 text-white py-2.5 rounded-xl text-sm font-bold shadow-xs hover:bg-red-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+              >
+                <Trash2 size={15} />
+                {isDeleting ? 'Deleting…' : 'Yes, Delete'}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
 
       {/* Lead detail modal */}
       {detail && (
@@ -373,13 +519,26 @@ export default function LeadsPage() {
               />
             </div>
 
-            <div className="flex gap-3 pt-1">
-              <button onClick={() => setDetail(null)} className="flex-1 border border-[#F3DCDC] text-[#1B2A44] py-2.5 rounded-xl text-sm font-semibold hover:bg-neutral-50 transition-colors">
-                Cancel
+            <div className="flex items-center justify-between gap-3 pt-2">
+              <button
+                onClick={() => {
+                  const toDelete = detail
+                  setDetail(null)
+                  setDeleteTarget({ type: 'single', lead: toDelete })
+                }}
+                className="flex items-center gap-1.5 text-xs font-bold text-red-600 hover:text-red-800 hover:bg-red-50 px-3 py-2.5 rounded-xl border border-red-200 transition-colors"
+              >
+                <Trash2 size={14} /> Delete Enquiry
               </button>
-              <button onClick={saveDetail} disabled={savingDetail} className="flex-1 bg-[#7E0D0D] text-white py-2.5 rounded-xl text-sm font-bold shadow-xs hover:bg-[#600a0a] transition-colors disabled:opacity-60">
-                {savingDetail ? 'Saving…' : 'Save Notes & Follow-up'}
-              </button>
+
+              <div className="flex items-center gap-2">
+                <button onClick={() => setDetail(null)} className="border border-[#F3DCDC] text-[#1B2A44] px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-neutral-50 transition-colors">
+                  Cancel
+                </button>
+                <button onClick={saveDetail} disabled={savingDetail} className="bg-[#7E0D0D] text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-xs hover:bg-[#600a0a] transition-colors disabled:opacity-60">
+                  {savingDetail ? 'Saving…' : 'Save Changes'}
+                </button>
+              </div>
             </div>
           </div>
         </Modal>
