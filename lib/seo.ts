@@ -36,7 +36,7 @@ export const GLOBAL_KEYWORDS = [
 ]
 
 /**
- * 1. Global EducationalOrganization Schema
+ * 1. Global EducationalOrganization Schema (SEO + GEO + AEO Entity)
  */
 export function getEducationalOrganizationSchema() {
   return {
@@ -44,7 +44,7 @@ export function getEducationalOrganizationSchema() {
     '@type': 'EducationalOrganization',
     '@id': `${SITE_URL}/#organization`,
     name: 'Hodu Academy',
-    alternateName: ['Hodu Academy Jaipur', 'Hodu International Coaching'],
+    alternateName: ['Hodu Academy Jaipur', 'Hodu International Coaching', 'Hodu Academy — Your Global Classroom'],
     url: SITE_URL,
     logo: `${SITE_URL}/favicon.png`,
     image: `${SITE_URL}/images/jaipur_center_bg.png`,
@@ -52,6 +52,18 @@ export function getEducationalOrganizationSchema() {
       'Jaipur’s premier coaching institute for Cambridge IGCSE, AS & A-Levels, IB Diploma (MYP & DP), CBSE Classes 9–12, IIT-JEE, and NEET-UG with 1:12 intimate batches and daily 1-on-1 doubt desks.',
     telephone: HODU.phone,
     email: HODU.email,
+    knowsAbout: [
+      'Cambridge IGCSE Curriculum & Past Papers',
+      'Cambridge AS & A Level Coaching',
+      'International Baccalaureate (IB DP & MYP)',
+      'CBSE Class 9, 10, 11, 12 Board Examinations',
+      'IIT-JEE (Main & Advanced) Preparation',
+      'NEET-UG Medical Entrance Coaching',
+      'Mathematics & Science Olympiads (IMO, NSO)',
+      'NCERT Solutions, Problem Solving & Formulas',
+      '1:12 Intimate Batch Mentorship',
+      'Daily 1-on-1 Faculty Doubt Desks',
+    ],
     address: {
       '@type': 'PostalAddress',
       streetAddress: DEFAULT_GEO.streetAddress,
@@ -76,7 +88,7 @@ export function getEducationalOrganizationSchema() {
       },
       {
         '@type': 'AdministrativeArea',
-        name: 'Global Online',
+        name: 'Global Online (UAE, Singapore, UK, US, Canada)',
       },
     ],
     sameAs: [
@@ -96,7 +108,10 @@ export function getEducationalOrganizationSchema() {
       '@type': 'Person',
       name: 'Abhishek Agarwal',
       jobTitle: 'Founder & Senior Academic Director',
+      description: 'Expert Educator with 15+ years mentoring IIT-JEE, NEET, Cambridge, and IB students.',
     },
+    paymentAccepted: 'Cash, Credit Card, Debit Card, UPI, Net Banking',
+    currenciesAccepted: 'INR, USD, EUR, GBP, AED',
     openingHoursSpecification: [
       {
         '@type': 'OpeningHoursSpecification',

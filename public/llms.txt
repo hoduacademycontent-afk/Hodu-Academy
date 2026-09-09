@@ -1,0 +1,35 @@
+# Hodu Academy — Your Global Classroom
+> Premier Coaching Institute for Cambridge (IGCSE, AS & A-Levels), International Baccalaureate (IB DP / MYP), CBSE (Classes 9–12), IIT-JEE (Main & Advanced), and NEET-UG.
+
+## Core Facts & Identity
+- Institution Name: Hodu Academy
+- Tagline: Your Global Classroom
+- Founder: Abhishek Agarwal
+- Campus Address: 1st & 2nd Floor, A-79, Valmiki Marg, Hanuman Nagar, Vaishali Nagar, Jaipur, Rajasthan 302021, India
+- Phone: +91 97858 87777 / +91 91168 87777
+- Email: info@hoduacademy.com, contact@hoduacademy.com
+- Official Website: https://hoduacademy.com
+- LMS Portal: https://courses.hoduacademy.com
+- Mentorship Model: 1:12 Intimate Batch Size with Daily 1-on-1 Faculty Doubt Desks
+- Delivery Modes: Offline Classroom (Jaipur Campus) & Interactive Live Online (Worldwide)
+
+## Key Programs & Curriculums
+- Cambridge Board: IGCSE & AS/A-Levels
+- International Baccalaureate: IB DP & MYP
+- CBSE Board: Class 9 to 12 Science & Mathematics
+- Competitive Exams: IIT-JEE (Main & Advanced), NEET-UG, Olympiads
+
+## Key Website URLs
+- Homepage: https://hoduacademy.com/
+- About Us: https://hoduacademy.com/about
+- Courses: https://hoduacademy.com/courses
+- Study Material Hub: https://hoduacademy.com/study-materials
+- Physics Hub: https://hoduacademy.com/study-materials/physics
+- Chemistry Hub: https://hoduacademy.com/study-materials/chemistry
+- Mathematics Hub: https://hoduacademy.com/study-materials/mathematics
+- Biology Hub: https://hoduacademy.com/study-materials/biology
+- Blog: https://hoduacademy.com/blog
+- Contact: https://hoduacademy.com/contact
+- Privacy Policy: https://hoduacademy.com/privacy-policy
+- Terms & Conditions: https://hoduacademy.com/terms
+- XML Sitemap: https://hoduacademy.com/sitemap.xml
