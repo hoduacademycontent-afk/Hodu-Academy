@@ -7,13 +7,18 @@ import { FALLBACK_BLOGS } from '@/lib/blogFallbacks'
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = await createClient()
 
-  const [{ data: courses }, { data: dbBlogs }] = await Promise.all([
+  const [{ data: courses }, { data: dbBlogs }, { data: customPages }] = await Promise.all([
     supabase
       .from('cms_courses')
       .select('slug, updated_at, created_at')
       .eq('site_id', HODU_SITE_ID),
     supabase
       .from('cms_blogs')
+      .select('slug, updated_at, created_at')
+      .eq('site_id', HODU_SITE_ID)
+      .eq('published', true),
+    supabase
+      .from('cms_pages')
       .select('slug, updated_at, created_at')
       .eq('site_id', HODU_SITE_ID)
       .eq('published', true),
@@ -60,6 +65,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.85,
     },
     {
+      url: `${SITE_URL}/gallery`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly',
+      priority: 0.85,
+    },
+    {
       url: `${SITE_URL}/ptm`,
       lastModified: currentDate,
       changeFrequency: 'monthly',
@@ -75,10 +86,52 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${SITE_URL}/study-materials`,
       lastModified: currentDate,
       changeFrequency: 'weekly',
-      priority: 0.8,
+      priority: 0.9,
+    },
+    {
+      url: `${SITE_URL}/study-materials/physics`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.85,
+    },
+    {
+      url: `${SITE_URL}/study-materials/chemistry`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.85,
+    },
+    {
+      url: `${SITE_URL}/study-materials/mathematics`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.85,
+    },
+    {
+      url: `${SITE_URL}/study-materials/biology`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.85,
     },
     {
       url: `${SITE_URL}/faq`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      url: `${SITE_URL}/faqs`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      url: `${SITE_URL}/enroll`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      url: `${SITE_URL}/lms`,
       lastModified: currentDate,
       changeFrequency: 'monthly',
       priority: 0.75,
@@ -87,19 +140,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${SITE_URL}/contact`,
       lastModified: currentDate,
       changeFrequency: 'monthly',
-      priority: 0.75,
+      priority: 0.8,
     },
     {
       url: `${SITE_URL}/privacy`,
       lastModified: currentDate,
       changeFrequency: 'yearly',
-      priority: 0.3,
+      priority: 0.4,
+    },
+    {
+      url: `${SITE_URL}/privacy-policy`,
+      lastModified: currentDate,
+      changeFrequency: 'yearly',
+      priority: 0.4,
     },
     {
       url: `${SITE_URL}/terms`,
       lastModified: currentDate,
       changeFrequency: 'yearly',
-      priority: 0.3,
+      priority: 0.4,
+    },
+    {
+      url: `${SITE_URL}/terms-and-conditions`,
+      lastModified: currentDate,
+      changeFrequency: 'yearly',
+      priority: 0.4,
     },
   ]
 
@@ -141,5 +206,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  return [...staticPages, ...coursePages, ...blogPages]
+  // Dynamic 185+ Custom Concept, Formula & PYQ Pages
+  const customConceptPages: MetadataRoute.Sitemap = (customPages ?? [])
+    .filter((p: any) => p.slug)
+    .map((p: any) => ({
+      url: `${SITE_URL}/p/${p.slug}`,
+      lastModified: p.updated_at || p.created_at ? new Date(p.updated_at || p.created_at) : currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.85,
+    }))
+
+  return [...staticPages, ...coursePages, ...blogPages, ...customConceptPages]
 }

@@ -3,15 +3,43 @@ import Link from 'next/link'
 import { ShieldCheck, Lock, Eye, Mail, Phone, Clock, ArrowRight, CheckCircle2, ChevronRight, UserCheck } from 'lucide-react'
 import ScrollReveal from '@/components/hodu/ScrollReveal'
 import BannerElasticMesh from '@/components/ui/BannerElasticMesh'
+import { SITE_URL, getWebPageSchema, getBreadcrumbSchema } from '@/lib/seo'
 
 export const metadata = {
-  title: 'Privacy Policy — Hodu Academy',
-  description: 'Official privacy policy of Hodu Academy outlining data protection, user privacy, SSL encryption, and information usage standards.',
+  title: 'Privacy Policy — Student Data & Protection Standards | Hodu Academy',
+  description: 'Official privacy policy of Hodu Academy Jaipur outlining student data protection, SSL security, contact privacy, and information usage standards.',
+  alternates: {
+    canonical: `${SITE_URL}/privacy-policy`,
+  },
+  openGraph: {
+    title: 'Privacy Policy — Hodu Academy',
+    description: 'Data protection, user privacy, SSL encryption, and security policies at Hodu Academy.',
+    url: `${SITE_URL}/privacy-policy`,
+    images: [{ url: `${SITE_URL}/images/jaipur_center_bg.png`, width: 1200, height: 630, alt: 'Hodu Academy Privacy Policy' }],
+  },
 }
 
 export default function PrivacyPolicyPage() {
+  const webPageSchema = getWebPageSchema({
+    title: 'Privacy Policy — Hodu Academy',
+    description: 'Official privacy policy of Hodu Academy Jaipur outlining data protection, user privacy, SSL encryption, and information usage standards.',
+    url: '/privacy-policy',
+  })
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: 'Home', url: '/' },
+    { name: 'Privacy Policy', url: '/privacy-policy' },
+  ])
+
   return (
     <div className="bg-brand-bg min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       {/* ─── Hero Header ─── */}
       <section className="relative py-14 sm:py-20 bg-[#3D0607] text-white overflow-hidden">
         <BannerElasticMesh variant="crimson" opacity={0.9} interaction="hover" />

@@ -146,32 +146,86 @@ function getOfficialPortalInfo(category?: string | null, title?: string | null) 
   return null
 }
 
+import { SITE_URL, cleanHtmlText, getCustomPageArticleSchema, getBreadcrumbSchema, getFAQPageSchema, extractFaqsFromHtml } from '@/lib/seo'
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  if (!slug) return { title: 'Pages | Hodu Academy' }
+  if (!slug) return { title: 'Study Notes & Formulas | Hodu Academy' }
 
   try {
     const supabase = await createClient()
     const { data: page } = await supabase
       .from('cms_pages')
-      .select('title, meta_title, excerpt, meta_description')
+      .select('title, meta_title, excerpt, meta_description, category, content')
       .eq('site_id', HODU_SITE_ID)
       .eq('slug', slug)
       .maybeSingle()
 
     if (page) {
+      const cleanTitle = cleanHtmlText(page.title)
+      const title = page.meta_title?.trim()
+        ? page.meta_title.trim()
+        : `${cleanTitle} — Formulas, Notes & Exam Solutions | Hodu Academy`
+
+      const rawDesc = page.meta_description?.trim() || page.excerpt?.trim() || page.content || ''
+      let cleanDesc = cleanHtmlText(rawDesc).slice(0, 160)
+      if (cleanDesc.length < 50) {
+        cleanDesc = `Master ${cleanTitle} with in-depth notes, standard definitions, formulas, and solved exam questions curated by expert mentors at Hodu Academy.`
+      }
+
+      const pageUrl = `${SITE_URL}/p/${slug}`
+      const categoryTag = page.category || 'Academic Concepts'
+
       return {
-        title: page.meta_title || `${page.title} | Hodu Academy`,
-        description: page.meta_description || page.excerpt || page.title,
+        title,
+        description: cleanDesc,
+        keywords: [
+          cleanTitle,
+          categoryTag,
+          `${cleanTitle} notes`,
+          `${cleanTitle} formula and derivation`,
+          `${cleanTitle} definition and examples`,
+          'Hodu Academy study materials',
+          'JEE Main notes',
+          'NEET UG concepts',
+          'CBSE Class 10 12 solutions',
+          'Cambridge IGCSE & IB DP',
+        ],
+        alternates: {
+          canonical: pageUrl,
+        },
+        openGraph: {
+          title,
+          description: cleanDesc,
+          url: pageUrl,
+          siteName: 'Hodu Academy',
+          type: 'article',
+          images: [
+            {
+              url: `${SITE_URL}/images/jaipur_center_bg.png`,
+              width: 1200,
+              height: 630,
+              alt: cleanTitle,
+            },
+          ],
+        },
+        twitter: {
+          card: 'summary_large_image',
+          title,
+          description: cleanDesc,
+        },
       }
     }
   } catch {}
 
-  return { title: 'Hodu Academy' }
+  return {
+    title: 'Study Notes & Formulas | Hodu Academy',
+    description: 'Comprehensive academic concepts, derivations, formula sheets, and past paper solutions by Hodu Academy.',
+  }
 }
 
 export default async function CustomPageViewPage({
@@ -201,8 +255,33 @@ export default async function CustomPageViewPage({
   const categoryHref = getCategoryHref(page.category)
   const officialPortal = getOfficialPortalInfo(page.category, page.title)
 
+  // Structured Data Schemas
+  const articleSchema = getCustomPageArticleSchema(page)
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: 'Home', url: '/' },
+    { name: page.category || "Learner's Hub", url: categoryHref },
+    { name: page.title, url: `/p/${slug}` },
+  ])
+  const extractedFaqs = extractFaqsFromHtml(page.content || '')
+  const faqSchema = extractedFaqs.length > 0 ? getFAQPageSchema(extractedFaqs) : null
+
   return (
     <div className="min-h-screen bg-[#FDFBFB]">
+      {/* Rich JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      {faqSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        />
+      )}
       {/* Sleek Breadcrumbs & Authority Link Bar */}
       <div className="bg-[#FAF7F7] border-b border-[#F0E4E4] px-4 py-3 sticky top-[108px] z-20 backdrop-blur-xs bg-white/95">
         <div className="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-3 text-xs">

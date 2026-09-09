@@ -3,15 +3,43 @@ import Link from 'next/link'
 import { FileText, Shield, Scale, Mail, Phone, Clock, ArrowRight, CheckCircle2, ChevronRight } from 'lucide-react'
 import ScrollReveal from '@/components/hodu/ScrollReveal'
 import BannerElasticMesh from '@/components/ui/BannerElasticMesh'
+import { SITE_URL, getWebPageSchema, getBreadcrumbSchema } from '@/lib/seo'
 
 export const metadata = {
-  title: 'Terms and Conditions — Hodu Academy',
-  description: 'Official terms and conditions governing the use of Hodu Academy learning platform, offline classroom programs, and online courses.',
+  title: 'Terms and Conditions — Academic Policy & Guidelines | Hodu Academy',
+  description: 'Official terms and conditions governing enrollment, classroom conduct, course materials, fee policies, and LMS access at Hodu Academy.',
+  alternates: {
+    canonical: `${SITE_URL}/terms`,
+  },
+  openGraph: {
+    title: 'Terms and Conditions — Hodu Academy',
+    description: 'Academic policies, enrollment terms, refund guidelines, and platform conditions at Hodu Academy.',
+    url: `${SITE_URL}/terms`,
+    images: [{ url: `${SITE_URL}/images/jaipur_center_bg.png`, width: 1200, height: 630, alt: 'Hodu Academy Terms and Conditions' }],
+  },
 }
 
 export default function TermsPage() {
+  const webPageSchema = getWebPageSchema({
+    title: 'Terms and Conditions — Hodu Academy',
+    description: 'Official terms and conditions governing enrollment, classroom conduct, course materials, and online platform access at Hodu Academy.',
+    url: '/terms',
+  })
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: 'Home', url: '/' },
+    { name: 'Terms and Conditions', url: '/terms' },
+  ])
+
   return (
     <div className="bg-brand-bg min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       {/* ─── Hero Header ─── */}
       <section className="relative py-14 sm:py-20 bg-[#3D0607] text-white overflow-hidden">
         <BannerElasticMesh variant="crimson" opacity={0.9} interaction="hover" />

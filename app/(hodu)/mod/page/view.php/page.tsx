@@ -15,6 +15,7 @@ import { createClient } from '@/lib/supabase/server'
 import { HODU_SITE_ID, HODU } from '@/lib/hodu'
 import EnquiryForm from '@/components/hodu/EnquiryForm'
 import { sanitizeContentLinks } from '@/lib/linkSanitizer'
+import { SITE_URL, cleanHtmlText, getCustomPageArticleSchema, getBreadcrumbSchema } from '@/lib/seo'
 import type { Metadata } from 'next'
 
 // Map categories to real clickable internal portal landing links
@@ -162,20 +163,39 @@ export async function generateMetadata({
     const supabase = await createClient()
     const { data: page } = await supabase
       .from('cms_pages')
-      .select('title, meta_title, excerpt, meta_description')
+      .select('title, slug, meta_title, excerpt, meta_description, category')
       .eq('site_id', HODU_SITE_ID)
       .or(`secondary_link.ilike.%id=${id}%,secondary_link.ilike.%${id}%,slug.eq.${id}`)
       .maybeSingle()
 
     if (page) {
+      const cleanTitle = cleanHtmlText(page.title)
+      const title = page.meta_title?.trim()
+        ? page.meta_title.trim()
+        : `${cleanTitle} — Formulas, Notes & Exam Solutions | Hodu Academy`
+      const rawDesc = page.meta_description?.trim() || page.excerpt?.trim() || ''
+      const cleanDesc = cleanHtmlText(rawDesc).slice(0, 160) || `Comprehensive guide and notes for ${cleanTitle} by Hodu Academy.`
+      const canonicalUrl = page.slug ? `${SITE_URL}/p/${page.slug}` : `${SITE_URL}/mod/page/view.php?id=${id}`
+
       return {
-        title: page.meta_title || `${page.title} | Hodu Academy`,
-        description: page.meta_description || page.excerpt || page.title,
+        title,
+        description: cleanDesc,
+        alternates: {
+          canonical: canonicalUrl,
+        },
+        openGraph: {
+          title,
+          description: cleanDesc,
+          url: canonicalUrl,
+          siteName: 'Hodu Academy',
+          type: 'article',
+          images: [`${SITE_URL}/images/jaipur_center_bg.png`],
+        },
       }
     }
   } catch {}
 
-  return { title: 'Hodu Academy' }
+  return { title: 'Study Resources & Guides | Hodu Academy' }
 }
 
 export default async function LegacyPageViewPage({

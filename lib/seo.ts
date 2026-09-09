@@ -346,7 +346,98 @@ export function getFAQPageSchema(faqs: Array<{ q: string; a: string }>) {
 }
 
 /**
- * 7. BreadcrumbList Schema
+ * Helper to strip HTML tags and decode common HTML entities for clean SEO meta descriptions
+ */
+export function cleanHtmlText(html: string = ''): string {
+  if (!html) return ''
+  return html
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+/**
+ * 8. Custom Concept / Formula / PYQ Page TechArticle & LearningResource Schema
+ */
+export function getCustomPageArticleSchema(page: {
+  title: string
+  slug: string
+  category?: string
+  content?: string
+  excerpt?: string
+  created_at?: string
+  updated_at?: string
+}) {
+  const publishedDate = page.created_at || '2026-01-01T00:00:00Z'
+  const modifiedDate = page.updated_at || page.created_at || new Date().toISOString()
+  const cleanDesc = cleanHtmlText(page.excerpt || page.content || page.title).slice(0, 250)
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${SITE_URL}/p/${page.slug}`,
+    },
+    headline: page.title,
+    description: cleanDesc,
+    image: [`${SITE_URL}/favicon.png`],
+    datePublished: publishedDate,
+    dateModified: modifiedDate,
+    author: {
+      '@type': 'EducationalOrganization',
+      name: 'Hodu Academy Academic Faculty Team',
+      url: SITE_URL,
+    },
+    publisher: {
+      '@type': 'EducationalOrganization',
+      name: 'Hodu Academy',
+      logo: {
+        '@type': 'ImageObject',
+        url: `${SITE_URL}/favicon.png`,
+      },
+    },
+    about: {
+      '@type': 'Thing',
+      name: page.category || 'Science, Mathematics & Competitive Exam Prep',
+    },
+    educationalLevel: page.category || 'High School & Competitive (JEE, NEET, CBSE, IGCSE, IB)',
+    inLanguage: 'en-IN',
+  }
+}
+
+/**
+ * 9. Generic WebPage Schema with Breadcrumbs
+ */
+export function getWebPageSchema(page: {
+  title: string
+  description: string
+  url: string
+  breadcrumb?: Array<{ name: string; url: string }>
+}) {
+  const canonical = page.url.startsWith('http') ? page.url : `${SITE_URL}${page.url}`
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': canonical,
+    url: canonical,
+    name: page.title,
+    description: cleanHtmlText(page.description),
+    publisher: {
+      '@id': `${SITE_URL}/#organization`,
+    },
+    inLanguage: 'en-IN',
+  }
+}
+
+/**
+ * 11. BreadcrumbList Schema
  */
 export function getBreadcrumbSchema(items: Array<{ name: string; url: string }>) {
   return {
@@ -360,3 +451,26 @@ export function getBreadcrumbSchema(items: Array<{ name: string; url: string }>)
     })),
   }
 }
+
+/**
+ * 12. Extract Q&A patterns from HTML content for automatic FAQPage schema generation
+ */
+export function extractFaqsFromHtml(html: string = ''): Array<{ q: string; a: string }> {
+  if (!html) return []
+  const faqs: Array<{ q: string; a: string }> = []
+  
+  // Match <h3> or <h4> or <b> with Question/Q/FAQ followed by answer paragraph
+  const qnaRegex = /(?:<h[3-5][^>]*>(?:Q(?:\d+)?[:.\-]\s*|FAQ[:.\-]\s*|)([\s\S]*?)<\/h[3-5]>|<b[^>]*>(?:Q(?:\d+)?[:.\-]\s*|)([\s\S]*?)<\/b>)\s*<p[^>]*>([\s\S]*?)<\/p>/gi
+  let match
+  while ((match = qnaRegex.exec(html)) !== null && faqs.length < 10) {
+    const rawQ = cleanHtmlText(match[1] || match[2] || '')
+    const rawA = cleanHtmlText(match[3] || '')
+    if (rawQ.length >= 8 && rawQ.length <= 160 && rawA.length >= 15 && (rawQ.includes('?') || rawQ.toLowerCase().includes('what') || rawQ.toLowerCase().includes('how') || rawQ.toLowerCase().includes('why') || rawQ.toLowerCase().includes('define') || rawQ.toLowerCase().includes('difference'))) {
+      faqs.push({ q: rawQ, a: rawA })
+    }
+  }
+
+  return faqs
+}
+
+
