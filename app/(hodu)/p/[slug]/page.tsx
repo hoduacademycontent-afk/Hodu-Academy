@@ -146,7 +146,18 @@ function getOfficialPortalInfo(category?: string | null, title?: string | null) 
   return null
 }
 
-import { SITE_URL, cleanHtmlText, getCustomPageArticleSchema, getBreadcrumbSchema, getFAQPageSchema, extractFaqsFromHtml } from '@/lib/seo'
+import {
+  SITE_URL,
+  cleanHtmlText,
+  getCustomPageArticleSchema,
+  getBreadcrumbSchema,
+  getFAQPageSchema,
+  extractFaqsFromHtml,
+  generateConceptMetaTitle,
+  generateConceptMetaDescription,
+  generateConceptKeywords,
+  extractKeyTakeaways,
+} from '@/lib/seo'
 
 export async function generateMetadata({
   params,
@@ -166,35 +177,32 @@ export async function generateMetadata({
       .maybeSingle()
 
     if (page) {
-      const cleanTitle = cleanHtmlText(page.title)
       const title = page.meta_title?.trim()
         ? page.meta_title.trim()
-        : `${cleanTitle} — Formulas, Notes & Exam Solutions | Hodu Academy`
+        : generateConceptMetaTitle(page.title, page.category)
 
-      const rawDesc = page.meta_description?.trim() || page.excerpt?.trim() || page.content || ''
-      let cleanDesc = cleanHtmlText(rawDesc).slice(0, 160)
-      if (cleanDesc.length < 50) {
-        cleanDesc = `Master ${cleanTitle} with in-depth notes, standard definitions, formulas, and solved exam questions curated by expert mentors at Hodu Academy.`
-      }
+      const cleanDesc = page.meta_description?.trim()
+        ? page.meta_description.trim()
+        : generateConceptMetaDescription(page.title, page.category, page.content, page.excerpt)
 
+      const keywords = generateConceptKeywords(page.title, page.category)
       const pageUrl = `${SITE_URL}/p/${slug}`
-      const categoryTag = page.category || 'Academic Concepts'
 
       return {
         title,
         description: cleanDesc,
-        keywords: [
-          cleanTitle,
-          categoryTag,
-          `${cleanTitle} notes`,
-          `${cleanTitle} formula and derivation`,
-          `${cleanTitle} definition and examples`,
-          'Hodu Academy study materials',
-          'JEE Main notes',
-          'NEET UG concepts',
-          'CBSE Class 10 12 solutions',
-          'Cambridge IGCSE & IB DP',
-        ],
+        keywords,
+        robots: {
+          index: true,
+          follow: true,
+          googleBot: {
+            index: true,
+            follow: true,
+            'max-snippet': -1,
+            'max-image-preview': 'large',
+            'max-video-preview': -1,
+          },
+        },
         alternates: {
           canonical: pageUrl,
         },
@@ -209,7 +217,7 @@ export async function generateMetadata({
               url: `${SITE_URL}/images/jaipur_center_bg.png`,
               width: 1200,
               height: 630,
-              alt: cleanTitle,
+              alt: page.title,
             },
           ],
         },
@@ -251,11 +259,25 @@ export default async function CustomPageViewPage({
     notFound()
   }
 
+  // Fetch related concepts in same category for internal linking & SEO crawling
+  let relatedPages: any[] = []
+  if (page.category) {
+    const { data: related } = await supabase
+      .from('cms_pages')
+      .select('title, slug, category, excerpt')
+      .eq('site_id', HODU_SITE_ID)
+      .eq('category', page.category)
+      .neq('slug', slug)
+      .limit(6)
+    relatedPages = related || []
+  }
+
   const safeContent = sanitizeContentLinks(page.content || '')
   const categoryHref = getCategoryHref(page.category)
   const officialPortal = getOfficialPortalInfo(page.category, page.title)
+  const keyTakeaways = extractKeyTakeaways(page.content || '', page.title)
 
-  // Structured Data Schemas
+  // Structured Data Schemas for SEO, AEO, and GEO
   const articleSchema = getCustomPageArticleSchema(page)
   const breadcrumbSchema = getBreadcrumbSchema([
     { name: 'Home', url: '/' },
@@ -282,6 +304,7 @@ export default async function CustomPageViewPage({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
       )}
+
       {/* Sleek Breadcrumbs & Authority Link Bar */}
       <div className="bg-[#FAF7F7] border-b border-[#F0E4E4] px-4 py-3 sticky top-[108px] z-20 backdrop-blur-xs bg-white/95">
         <div className="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-3 text-xs">
@@ -323,6 +346,28 @@ export default async function CustomPageViewPage({
       {/* Spacious Full-Width Content Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <article className="w-full">
+          {/* AEO / Answer Engine Optimization Quick Summary Box */}
+          <div className="aeo-quick-answer mb-8 bg-gradient-to-r from-[#FFF8F0] to-[#FFF3E6] border-2 border-[#F3DCDC] rounded-2xl p-5 sm:p-7 shadow-xs">
+            <div className="flex items-center gap-2 text-[#7A001F] mb-3">
+              <Sparkles size={18} className="text-amber-600 shrink-0" />
+              <h2 className="text-sm sm:text-base font-extrabold uppercase tracking-wide">
+                Key Summary & High-Yield Concept Takeaways
+              </h2>
+            </div>
+            <p className="text-xs sm:text-sm text-neutral-700 mb-3 leading-relaxed">
+              Curated by senior faculty at <strong>Hodu Academy</strong> for fast revision, formula derivations, and standard board & competitive exam marking schemes.
+            </p>
+            <ul className="grid sm:grid-cols-2 gap-2 text-xs sm:text-sm text-neutral-800 list-none p-0 m-0">
+              {keyTakeaways.map((point, idx) => (
+                <li key={idx} className="flex items-start gap-2 bg-white/80 border border-[#F0E4E4] rounded-xl p-2.5">
+                  <span className="text-[#7A001F] font-bold shrink-0">✓</span>
+                  <span className="leading-snug">{point}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Main Article Content */}
           <div
             className="prose prose-neutral max-w-none text-neutral-800 leading-relaxed
               prose-headings:text-[#7A001F] prose-headings:font-bold prose-headings:tracking-tight
@@ -334,6 +379,50 @@ export default async function CustomPageViewPage({
             dangerouslySetInnerHTML={{ __html: safeContent }}
           />
         </article>
+
+        {/* Related Concepts in Category Grid (Internal Linking & SEO Link Equity) */}
+        {relatedPages.length > 0 && (
+          <section className="mt-14 pt-10 border-t border-[#F0E4E4]">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-widest text-[#7A001F]">Explore More Guides</span>
+                <h3 className="text-xl font-black text-[#1B2A44] mt-0.5">
+                  Related Concepts in {page.category || 'Study Hub'}
+                </h3>
+              </div>
+              <Link
+                href={categoryHref}
+                className="text-xs font-bold text-[#7A001F] hover:underline flex items-center gap-1"
+              >
+                <span>View All In Category</span>
+                <ChevronRight size={13} />
+              </Link>
+            </div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {relatedPages.map((rel) => (
+                <Link
+                  key={rel.slug}
+                  href={`/p/${rel.slug}`}
+                  className="group bg-white hover:bg-[#FDF5F5] border border-[#F3DCDC] hover:border-[#7A001F] rounded-2xl p-4 transition-all shadow-xs flex flex-col justify-between"
+                >
+                  <div>
+                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-[#FFF4EA] text-[#7A001F] border border-[#F0E4E4] inline-block mb-2">
+                      {rel.category}
+                    </span>
+                    <h4 className="font-bold text-sm text-[#1B2A44] group-hover:text-[#7A001F] transition-colors line-clamp-2">
+                      {rel.title}
+                    </h4>
+                  </div>
+                  <div className="mt-3 flex items-center gap-1 text-xs font-semibold text-[#7A001F]">
+                    <span>Read Study Guide</span>
+                    <ChevronRight size={12} className="group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Full-Width Bottom CTA & Academic Mentorship Section */}
         <section className="mt-16 pt-10 border-t border-[#F0E4E4]">

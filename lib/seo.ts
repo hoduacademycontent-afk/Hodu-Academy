@@ -407,6 +407,9 @@ export function cleanHtmlText(html: string = ''): string {
 /**
  * 8. Custom Concept / Formula / PYQ Page TechArticle & LearningResource Schema
  */
+/**
+ * 8. Custom Concept / Formula / PYQ Page TechArticle & LearningResource Schema
+ */
 export function getCustomPageArticleSchema(page: {
   title: string
   slug: string
@@ -418,7 +421,8 @@ export function getCustomPageArticleSchema(page: {
 }) {
   const publishedDate = page.created_at || '2026-01-01T00:00:00Z'
   const modifiedDate = page.updated_at || page.created_at || new Date().toISOString()
-  const cleanDesc = cleanHtmlText(page.excerpt || page.content || page.title).slice(0, 250)
+  const cleanDesc = generateConceptMetaDescription(page.title, page.category, page.content, page.excerpt)
+  const cleanTitle = cleanHtmlText(page.title)
 
   return {
     '@context': 'https://schema.org',
@@ -429,13 +433,23 @@ export function getCustomPageArticleSchema(page: {
     },
     headline: page.title,
     description: cleanDesc,
-    image: [`${SITE_URL}/favicon.png`],
+    image: [`${SITE_URL}/favicon.png`, `${SITE_URL}/images/jaipur_center_bg.png`],
     datePublished: publishedDate,
     dateModified: modifiedDate,
+    speakable: {
+      '@type': 'SpeakableSpecification',
+      cssSelector: ['.aeo-quick-answer', 'h1', 'h2', 'h3'],
+    },
     author: {
       '@type': 'EducationalOrganization',
       name: 'Hodu Academy Academic Faculty Team',
       url: SITE_URL,
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: DEFAULT_GEO.addressLocality,
+        addressRegion: DEFAULT_GEO.addressRegion,
+        addressCountry: DEFAULT_GEO.country,
+      },
     },
     publisher: {
       '@type': 'EducationalOrganization',
@@ -447,11 +461,150 @@ export function getCustomPageArticleSchema(page: {
     },
     about: {
       '@type': 'Thing',
-      name: page.category || 'Science, Mathematics & Competitive Exam Prep',
+      name: cleanTitle,
+      description: `${cleanTitle} complete academic notes, formulas, derivations and exam solutions.`,
     },
     educationalLevel: page.category || 'High School & Competitive (JEE, NEET, CBSE, IGCSE, IB)',
+    educationalUse: ['Revision Notes', 'Formula Sheet', 'NCERT Solutions', 'Exam Practice'],
+    learningResourceType: 'Study Guide',
     inLanguage: 'en-IN',
+    keywords: generateConceptKeywords(page.title, page.category).join(', '),
   }
+}
+
+/**
+ * Generates dynamic, high-ranking SEO / AEO / GEO Titles for concept pages
+ */
+export function generateConceptMetaTitle(title: string, category?: string | null): string {
+  const clean = cleanHtmlText(title).trim()
+  const cat = (category || '').trim()
+
+  if (cat.toLowerCase().includes('jee')) {
+    return `${clean} — JEE Main & Advanced Notes, Formulas & PYQs | Hodu Academy`
+  }
+  if (cat.toLowerCase().includes('neet')) {
+    return `${clean} — NEET UG Concepts, Formulas & Question Bank | Hodu Academy`
+  }
+  if (cat.toLowerCase().includes('cbse 10') || cat.toLowerCase().includes('class 10')) {
+    return `${clean} Class 10 CBSE — Notes, NCERT Solutions & PYQs | Hodu Academy`
+  }
+  if (cat.toLowerCase().includes('cbse 12') || cat.toLowerCase().includes('class 12')) {
+    return `${clean} Class 12 CBSE — Complete Notes, Derivations & Formulas | Hodu Academy`
+  }
+  if (cat.toLowerCase().includes('formula')) {
+    return `${clean} Formula Sheet & Quick Derivation Notes | Hodu Academy`
+  }
+  if (cat.toLowerCase().includes('ncert')) {
+    return `${clean} NCERT Solutions, Step-by-Step Explanations | Hodu Academy`
+  }
+  if (cat.toLowerCase().includes('olympiad')) {
+    return `${clean} Olympiad (IMO/NSO) Notes & Advanced Problems | Hodu Academy`
+  }
+  if (cat.toLowerCase().includes('cuet')) {
+    return `${clean} CUET UG Chapter Notes & High-Yield MCQs | Hodu Academy`
+  }
+  if (cat.toLowerCase().includes('international') || cat.toLowerCase().includes('igcse') || cat.toLowerCase().includes('ib')) {
+    return `${clean} — Cambridge IGCSE & IB DP Study Guide | Hodu Academy`
+  }
+
+  return `${clean} — Notes, Formulas, Solved Examples & PYQs | Hodu Academy`
+}
+
+/**
+ * Generates high-CTR AEO & SEO meta descriptions
+ */
+export function generateConceptMetaDescription(
+  title: string,
+  category?: string | null,
+  content?: string | null,
+  excerpt?: string | null
+): string {
+  const cleanTitle = cleanHtmlText(title).trim()
+  const cat = (category || 'Academic Concepts').trim()
+
+  const snippet = cleanHtmlText(excerpt || content || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+
+  if (snippet.length >= 70 && !snippet.toLowerCase().startsWith('select one:')) {
+    // If rich snippet available, format into 155-160 chars
+    const firstSentence = snippet.split(/(?<=[.?!])\s+/)[0] || snippet
+    if (firstSentence.length >= 60 && firstSentence.length <= 145) {
+      return `${firstSentence} Learn ${cleanTitle} with expert notes, formulas, and 1-on-1 doubt solving at Hodu Academy.`
+    }
+  }
+
+  return `Master ${cleanTitle} (${cat}) with concise notes, essential formulas, step-by-step solved examples, and past exam questions curated by expert mentors at Hodu Academy.`
+}
+
+/**
+ * Generates 25+ High-Intent Keywords for search engine dominance
+ */
+export function generateConceptKeywords(title: string, category?: string | null): string[] {
+  const cleanTitle = cleanHtmlText(title).trim()
+  const cat = (category || 'Academic Concepts').trim()
+
+  const list = [
+    cleanTitle,
+    `${cleanTitle} notes`,
+    `${cleanTitle} formulas`,
+    `${cleanTitle} formula sheet`,
+    `${cleanTitle} definition`,
+    `${cleanTitle} solved questions`,
+    `${cleanTitle} past year questions`,
+    `${cleanTitle} PYQs`,
+    `${cleanTitle} derivations`,
+    `${cleanTitle} NCERT solutions`,
+    `${cleanTitle} class 10 12`,
+    `${cleanTitle} JEE Main`,
+    `${cleanTitle} NEET UG`,
+    `${cleanTitle} CUET exam`,
+    `${cleanTitle} Cambridge IGCSE`,
+    `${cleanTitle} IB DP`,
+    cat,
+    `${cat} preparation`,
+    `${cat} study materials`,
+    'coaching near me',
+    'best education institute near me',
+    'best coaching institute near me',
+    'top tuition classes near me',
+    'maths science coaching near me',
+    '1 on 1 doubt clearing coaching',
+    'Hodu Academy study hub',
+    'Hodu Academy Jaipur',
+  ]
+
+  return Array.from(new Set(list))
+}
+
+/**
+ * Extracts 3-4 structured key takeaways for AEO AI Overview cards
+ */
+export function extractKeyTakeaways(html: string = '', title: string = ''): string[] {
+  if (!html) return [`Comprehensive conceptual breakdown of ${title}.`, 'Standard exam definitions and key derivations.', 'Curated practice questions and step-by-step solutions.', 'Personalized 1-on-1 faculty guidance available at Hodu Academy.']
+  
+  const takeaways: string[] = []
+  
+  // Look for bold points or list items
+  const liRegex = /<li[^>]*>([\s\S]*?)<\/li>/gi
+  let match
+  while ((match = liRegex.exec(html)) !== null && takeaways.length < 4) {
+    const text = cleanHtmlText(match[1])
+    if (text.length >= 20 && text.length <= 150 && !text.includes('Copyright') && !text.includes('http')) {
+      takeaways.push(text)
+    }
+  }
+
+  if (takeaways.length < 3) {
+    takeaways.push(
+      `In-depth conceptual revision and fundamental principles of ${title}.`,
+      'High-yield formula sheet, essential laws, and exam definitions.',
+      'Step-by-step problem-solving methods and common exam pitfalls.',
+      '1:12 small-batch classroom coaching and daily doubt resolution at Hodu Academy.'
+    )
+  }
+
+  return takeaways.slice(0, 4)
 }
 
 /**
@@ -514,5 +667,6 @@ export function extractFaqsFromHtml(html: string = ''): Array<{ q: string; a: st
 
   return faqs
 }
+
 
 

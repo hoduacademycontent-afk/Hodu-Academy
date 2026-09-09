@@ -219,6 +219,10 @@ export default async function LegacyPageViewPage({
     .or(`secondary_link.ilike.%id=${id}%,secondary_link.ilike.%${id}%,slug.eq.${id}`)
     .maybeSingle()
 
+  if (page?.slug) {
+    redirect(`/p/${page.slug}`)
+  }
+
   if (page) {
     const safeContent = sanitizeContentLinks(page.content || '')
     const categoryHref = getCategoryHref(page.category)
