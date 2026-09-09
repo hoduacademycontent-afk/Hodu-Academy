@@ -370,123 +370,267 @@ export default function AcademicExcellenceResults({
                 </h3>
               </div>
 
-              {/* ─── Main Content Flex Grid (Left Top Ranker + Right 10 Achievers OR Full-Width Grid) ─── */}
+              {/* ─── Main Content Flex Grid (Adaptive Layout based on Student Count & Spotlight setting) ─── */}
               {activeDeck.has_spotlight_topper !== false && activeDeck.topRanker?.name?.trim() ? (
-                <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-8 items-center">
-                  
-                  {/* ─── Left Spotlight: Single Top Ranker ─── */}
-                  <div className="lg:col-span-3 flex flex-col items-center justify-center text-center">
-                    <div className="relative group">
-                      {/* Glowing Spotlight Circle Backdrop */}
-                      <div className="w-36 h-36 sm:w-44 sm:h-44 md:w-52 md:h-52 rounded-full bg-gradient-to-b from-sky-100 to-sky-200/60 p-2 sm:p-2.5 shadow-inner flex items-center justify-center border-2 border-sky-300/70">
-                        {activeDeck.topRanker?.photo ? (
-                          <img
-                            src={normalizeImageUrl(activeDeck.topRanker.photo)}
-                            alt={activeDeck.topRanker.name}
-                            className="w-full h-full rounded-full object-cover shadow-md group-hover:scale-105 transition-transform duration-500"
-                            loading="eager"
-                          />
-                        ) : (
-                          <div
-                            className="w-full h-full rounded-full text-white font-serif-editorial font-bold text-3xl sm:text-5xl flex items-center justify-center shadow-md"
-                            style={{ backgroundColor: cardThemeColor }}
-                          >
-                            {activeDeck.topRanker?.initials || 'TR'}
-                          </div>
-                        )}
-                      </div>
+                /* ─── SPOTLIGHT TOPPER MODE ─── */
+                (() => {
+                  const numPerformers = activeDeck.performers?.length || 0
 
-                      </div>
-
-                      {/* Large Score Pill Below Photo (Wraps to New Line) */}
-                      <div className="relative -mt-4 sm:-mt-5 z-20 w-full max-w-[200px] sm:max-w-[260px] mx-auto flex justify-center">
-                        <span
-                          className="inline-block text-white text-xs sm:text-sm md:text-base font-extrabold px-3 sm:px-5 py-1 sm:py-1.5 rounded-xl sm:rounded-2xl shadow-xl border-2 border-white tracking-tight text-center leading-snug whitespace-normal [overflow-wrap:anywhere] break-words w-full"
-                          style={{ backgroundColor: cardThemeColor }}
-                          title={activeDeck.topRanker?.score}
-                        >
-                          {activeDeck.topRanker?.score}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Student Name */}
-                    <div className="mt-2 sm:mt-3 space-y-0.5 w-full px-2">
-                      <h4 className="font-serif-editorial text-base sm:text-lg md:text-xl font-bold text-neutral-900 line-clamp-2 leading-tight">
-                        {activeDeck.topRanker?.name}
-                      </h4>
-                      <p className="text-[11px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider line-clamp-2 mt-0.5" title={activeDeck.topRanker?.designation}>
-                        {activeDeck.topRanker?.designation || 'Batch Topper'}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* ─── Right Grid: Achievers (Locked in Column, 0% Mobile Overlap) ─── */}
-                  <div className="lg:col-span-9">
-                    <div className="flex flex-wrap justify-center items-start gap-y-6 sm:gap-y-8 gap-x-2.5 sm:gap-x-6">
-                      {activeDeck.performers?.map((student, sIdx) => (
-                        <div
-                          key={sIdx}
-                          className="flex flex-col items-center text-center group cursor-pointer w-24 sm:w-28 md:w-32 shrink-0"
-                        >
-                          {/* Student Circle Portrait */}
-                          <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-b from-sky-100 to-sky-200/60 p-1 shadow-sm border-2 border-sky-300/60 overflow-hidden flex items-center justify-center mx-auto">
-                            {student.photo ? (
+                  // Sub-Case A: Only 1 Student Total (Spotlight Topper only)
+                  if (numPerformers === 0) {
+                    return (
+                      <div className="relative z-10 flex justify-center items-center py-4">
+                        <div className="flex flex-col items-center text-center max-w-xs group">
+                          {/* Spotlight Portrait */}
+                          <div className="w-36 h-36 sm:w-44 sm:h-44 md:w-52 md:h-52 rounded-full bg-gradient-to-b from-sky-100 to-sky-200/70 p-2 shadow-lg flex items-center justify-center border-2 border-sky-300 overflow-hidden mx-auto">
+                            {activeDeck.topRanker?.photo ? (
                               <img
-                                src={normalizeImageUrl(student.photo)}
-                                alt={student.name}
-                                className="w-full h-full rounded-full object-cover group-hover:scale-110 transition-transform duration-300"
-                                loading="lazy"
+                                src={normalizeImageUrl(activeDeck.topRanker.photo)}
+                                alt={activeDeck.topRanker.name}
+                                className="w-full h-full rounded-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                loading="eager"
                               />
                             ) : (
                               <div
-                                className="w-full h-full rounded-full text-white font-bold text-xs sm:text-sm flex items-center justify-center"
+                                className="w-full h-full rounded-full text-white font-serif-editorial font-bold text-3xl sm:text-5xl flex items-center justify-center shadow-md"
                                 style={{ backgroundColor: cardThemeColor }}
                               >
-                                {student.initials || student.name.slice(0, 2).toUpperCase()}
+                                {activeDeck.topRanker?.initials || 'TR'}
                               </div>
                             )}
                           </div>
 
-                          {/* Score / College Pill: In Document Flow, Multi-Line Wrapped, Never Overlaps */}
-                          <div className="relative -mt-2 sm:-mt-2.5 z-10 w-full max-w-[105px] sm:max-w-[125px] md:max-w-[140px] mx-auto flex justify-center">
+                          {/* Score Pill: Sitting cleanly below photo */}
+                          <div className="mt-2.5 sm:mt-3 w-full max-w-[200px] sm:max-w-[240px] flex justify-center">
                             <span
-                              className="inline-block text-white text-[8px] sm:text-[9.5px] md:text-[10.5px] font-bold px-1.5 sm:px-2 py-0.5 rounded-lg sm:rounded-xl shadow-md border border-white tracking-tight text-center leading-tight whitespace-normal [overflow-wrap:anywhere] break-words line-clamp-3 w-full"
+                              className="inline-block text-white text-xs sm:text-sm md:text-base font-extrabold px-3.5 sm:px-5 py-1.5 rounded-xl sm:rounded-2xl shadow-md border-2 border-white tracking-tight text-center leading-tight whitespace-normal [overflow-wrap:anywhere] break-words w-full"
                               style={{ backgroundColor: cardThemeColor }}
-                              title={student.score}
+                              title={activeDeck.topRanker?.score}
                             >
-                              {student.score}
+                              {activeDeck.topRanker?.score}
                             </span>
                           </div>
 
                           {/* Student Name */}
-                          <h5 className="mt-1.5 sm:mt-2 text-[11px] sm:text-xs md:text-sm font-bold text-neutral-900 line-clamp-1 group-hover:opacity-80 transition-opacity w-full px-0.5">
-                            {student.name}
-                          </h5>
+                          <h4 className="mt-2 sm:mt-3 font-serif-editorial text-base sm:text-lg md:text-xl font-bold text-neutral-900 line-clamp-2 leading-tight">
+                            {activeDeck.topRanker?.name}
+                          </h4>
+                          <p className="text-[11px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider line-clamp-2 mt-0.5" title={activeDeck.topRanker?.designation}>
+                            {activeDeck.topRanker?.designation || 'Batch Topper'}
+                          </p>
+                        </div>
+                      </div>
+                    )
+                  }
 
-                          {/* Student Designation (if available) */}
-                          {student.designation && (
-                            <p className="text-[9px] sm:text-[10px] font-medium text-neutral-600 line-clamp-1 mt-0.5 w-full px-0.5 leading-tight" title={student.designation}>
-                              {student.designation}
-                            </p>
+                  // Sub-Case B: 2 to 4 Students Total (Tight Centered Grouping - NO giant empty gaps)
+                  if (numPerformers <= 3) {
+                    return (
+                      <div className="relative z-10 flex flex-wrap items-center justify-center gap-6 sm:gap-10 md:gap-14 max-w-4xl mx-auto py-2">
+                        {/* Spotlight Topper (Slightly larger, Rank 1) */}
+                        <div className="flex flex-col items-center text-center w-36 sm:w-44 md:w-52 shrink-0 group cursor-pointer">
+                          <div className="w-28 h-28 sm:w-36 sm:h-36 md:w-44 md:h-44 rounded-full bg-gradient-to-b from-sky-100 to-sky-200/70 p-1.5 sm:p-2 shadow-lg flex items-center justify-center border-2 border-sky-300 overflow-hidden mx-auto">
+                            {activeDeck.topRanker?.photo ? (
+                              <img
+                                src={normalizeImageUrl(activeDeck.topRanker.photo)}
+                                alt={activeDeck.topRanker.name}
+                                className="w-full h-full rounded-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                loading="eager"
+                              />
+                            ) : (
+                              <div
+                                className="w-full h-full rounded-full text-white font-serif-editorial font-bold text-2xl sm:text-4xl flex items-center justify-center shadow-md"
+                                style={{ backgroundColor: cardThemeColor }}
+                              >
+                                {activeDeck.topRanker?.initials || 'TR'}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Score Pill Below Photo */}
+                          <div className="mt-2 sm:mt-2.5 w-full max-w-[160px] sm:max-w-[200px] flex justify-center">
+                            <span
+                              className="inline-block text-white text-[11px] sm:text-xs md:text-sm font-extrabold px-3 py-1 sm:py-1.5 rounded-xl shadow-md border-2 border-white tracking-tight text-center leading-tight whitespace-normal [overflow-wrap:anywhere] break-words w-full"
+                              style={{ backgroundColor: cardThemeColor }}
+                              title={activeDeck.topRanker?.score}
+                            >
+                              {activeDeck.topRanker?.score}
+                            </span>
+                          </div>
+
+                          {/* Name & Designation */}
+                          <h4 className="mt-2 font-serif-editorial text-sm sm:text-base md:text-lg font-bold text-neutral-900 line-clamp-2 leading-tight">
+                            {activeDeck.topRanker?.name}
+                          </h4>
+                          <p className="text-[10px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider line-clamp-2 mt-0.5">
+                            {activeDeck.topRanker?.designation || 'Top Ranker'}
+                          </p>
+                        </div>
+
+                        {/* Achievers (Rank 2, 3, 4...) */}
+                        {activeDeck.performers?.map((student, sIdx) => (
+                          <div
+                            key={sIdx}
+                            className="flex flex-col items-center text-center w-32 sm:w-40 md:w-48 shrink-0 group cursor-pointer"
+                          >
+                            <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-full bg-gradient-to-b from-sky-100 to-sky-200/70 p-1.5 shadow-md flex items-center justify-center border-2 border-sky-300/80 overflow-hidden mx-auto">
+                              {student.photo ? (
+                                <img
+                                  src={normalizeImageUrl(student.photo)}
+                                  alt={student.name}
+                                  className="w-full h-full rounded-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                  loading="lazy"
+                                />
+                              ) : (
+                                <div
+                                  className="w-full h-full rounded-full text-white font-bold text-lg sm:text-2xl flex items-center justify-center shadow-md"
+                                  style={{ backgroundColor: cardThemeColor }}
+                                >
+                                  {student.initials || student.name.slice(0, 2).toUpperCase()}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Score Pill Below Photo */}
+                            <div className="mt-2 sm:mt-2.5 w-full max-w-[145px] sm:max-w-[180px] flex justify-center">
+                              <span
+                                className="inline-block text-white text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-xl shadow-md border border-white tracking-tight text-center leading-tight whitespace-normal [overflow-wrap:anywhere] break-words line-clamp-3 w-full"
+                                style={{ backgroundColor: cardThemeColor }}
+                                title={student.score}
+                              >
+                                {student.score}
+                              </span>
+                            </div>
+
+                            {/* Student Name */}
+                            <h5 className="mt-1.5 sm:mt-2 text-xs sm:text-sm md:text-base font-bold text-neutral-900 line-clamp-1 group-hover:opacity-80 transition-opacity w-full px-0.5">
+                              {student.name}
+                            </h5>
+
+                            {/* Student Designation */}
+                            {student.designation && (
+                              <p className="text-[10px] sm:text-xs font-medium text-neutral-600 line-clamp-1 mt-0.5 w-full px-0.5 leading-tight" title={student.designation}>
+                                {student.designation}
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  }
+
+                  // Sub-Case C: 5+ Students Total (Standard Left Spotlight + Right Grid)
+                  return (
+                    <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-8 items-center">
+                      {/* Left Spotlight: Single Top Ranker */}
+                      <div className="lg:col-span-3 flex flex-col items-center justify-center text-center group cursor-pointer">
+                        <div className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-full bg-gradient-to-b from-sky-100 to-sky-200/70 p-2 shadow-md flex items-center justify-center border-2 border-sky-300 overflow-hidden mx-auto">
+                          {activeDeck.topRanker?.photo ? (
+                            <img
+                              src={normalizeImageUrl(activeDeck.topRanker.photo)}
+                              alt={activeDeck.topRanker.name}
+                              className="w-full h-full rounded-full object-cover group-hover:scale-105 transition-transform duration-500"
+                              loading="eager"
+                            />
+                          ) : (
+                            <div
+                              className="w-full h-full rounded-full text-white font-serif-editorial font-bold text-3xl sm:text-4xl flex items-center justify-center shadow-md"
+                              style={{ backgroundColor: cardThemeColor }}
+                            >
+                              {activeDeck.topRanker?.initials || 'TR'}
+                            </div>
                           )}
                         </div>
-                      ))}
-                    </div>
-                  </div>
 
-                </div>
+                        {/* Score Pill Below Photo */}
+                        <div className="mt-2 sm:mt-2.5 w-full max-w-[170px] sm:max-w-[210px] mx-auto flex justify-center">
+                          <span
+                            className="inline-block text-white text-[11px] sm:text-xs md:text-sm font-extrabold px-3 py-1 sm:py-1.5 rounded-xl shadow-md border-2 border-white tracking-tight text-center leading-tight whitespace-normal [overflow-wrap:anywhere] break-words w-full"
+                            style={{ backgroundColor: cardThemeColor }}
+                            title={activeDeck.topRanker?.score}
+                          >
+                            {activeDeck.topRanker?.score}
+                          </span>
+                        </div>
+
+                        {/* Student Name */}
+                        <div className="mt-2 space-y-0.5 w-full px-2">
+                          <h4 className="font-serif-editorial text-sm sm:text-base md:text-lg font-bold text-neutral-900 line-clamp-2 leading-tight">
+                            {activeDeck.topRanker?.name}
+                          </h4>
+                          <p className="text-[10px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider line-clamp-2 mt-0.5" title={activeDeck.topRanker?.designation}>
+                            {activeDeck.topRanker?.designation || 'Batch Topper'}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Right Grid: Achievers (Flex Wrap, perfectly balanced) */}
+                      <div className="lg:col-span-9">
+                        <div className="flex flex-wrap justify-center items-start gap-y-5 sm:gap-y-7 gap-x-2.5 sm:gap-x-5">
+                          {activeDeck.performers?.map((student, sIdx) => (
+                            <div
+                              key={sIdx}
+                              className="flex flex-col items-center text-center group cursor-pointer w-24 sm:w-28 md:w-32 shrink-0"
+                            >
+                              {/* Student Circle Portrait */}
+                              <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-b from-sky-100 to-sky-200/70 p-1 shadow-sm border-2 border-sky-300/70 overflow-hidden flex items-center justify-center mx-auto">
+                                {student.photo ? (
+                                  <img
+                                    src={normalizeImageUrl(student.photo)}
+                                    alt={student.name}
+                                    className="w-full h-full rounded-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                    loading="lazy"
+                                  />
+                                ) : (
+                                  <div
+                                    className="w-full h-full rounded-full text-white font-bold text-xs sm:text-sm flex items-center justify-center"
+                                    style={{ backgroundColor: cardThemeColor }}
+                                  >
+                                    {student.initials || student.name.slice(0, 2).toUpperCase()}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Score / College Pill: Strictly below photo, multi-line auto-wrapping */}
+                              <div className="mt-1.5 sm:mt-2 w-full max-w-[105px] sm:max-w-[125px] md:max-w-[140px] mx-auto flex justify-center">
+                                <span
+                                  className="inline-block text-white text-[8.5px] sm:text-[9.5px] md:text-[10.5px] font-bold px-1.5 sm:px-2 py-0.5 rounded-lg sm:rounded-xl shadow-xs border border-white tracking-tight text-center leading-tight whitespace-normal [overflow-wrap:anywhere] break-words line-clamp-3 w-full"
+                                  style={{ backgroundColor: cardThemeColor }}
+                                  title={student.score}
+                                >
+                                  {student.score}
+                                </span>
+                              </div>
+
+                              {/* Student Name */}
+                              <h5 className="mt-1 sm:mt-1.5 text-[11px] sm:text-xs md:text-sm font-bold text-neutral-900 line-clamp-1 group-hover:opacity-80 transition-opacity w-full px-0.5">
+                                {student.name}
+                              </h5>
+
+                              {/* Student Designation */}
+                              {student.designation && (
+                                <p className="text-[9px] sm:text-[10px] font-medium text-neutral-600 line-clamp-1 mt-0.5 w-full px-0.5 leading-tight" title={student.designation}>
+                                  {student.designation}
+                                </p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })()
               ) : (
-                /* ─── Full-Width Achievers Grid (International Admissions / Olympiads / College Placements) ─── */
+                /* ─── FULL-WIDTH EQUAL ACHIEVERS GRID (International Admissions / Olympiads / College Placements) ─── */
                 <div className="relative z-10 w-full px-1 sm:px-4">
-                  <div className="flex flex-wrap justify-center items-start gap-y-7 sm:gap-y-10 gap-x-3 sm:gap-x-6 md:gap-x-8 max-w-6xl mx-auto">
+                  <div className="flex flex-wrap justify-center items-start gap-y-6 sm:gap-y-8 gap-x-3 sm:gap-x-6 md:gap-x-8 max-w-6xl mx-auto">
                     {activeDeck.performers?.map((student, sIdx) => (
                       <div
                         key={sIdx}
                         className="flex flex-col items-center text-center group cursor-pointer w-28 sm:w-36 md:w-44 shrink-0"
                       >
-                        {/* Student Circle Portrait */}
-                        <div className="w-18 h-18 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-sky-100 to-sky-200/60 p-1 shadow-sm border-2 border-sky-300/60 overflow-hidden flex items-center justify-center mx-auto">
+                        {/* Student Circle Portrait: 100% Unobstructed */}
+                        <div className="w-20 h-20 sm:w-26 sm:h-26 md:w-30 md:h-30 rounded-full bg-gradient-to-b from-sky-100 to-sky-200/70 p-1 shadow-sm border-2 border-sky-300/70 overflow-hidden flex items-center justify-center mx-auto">
                           {student.photo ? (
                             <img
                               src={normalizeImageUrl(student.photo)}
@@ -504,10 +648,10 @@ export default function AcademicExcellenceResults({
                           )}
                         </div>
 
-                        {/* Score / College Pill: Multi-line text wrapping on new lines, strictly locked in container */}
-                        <div className="relative -mt-2.5 sm:-mt-3 z-10 w-full max-w-[115px] sm:max-w-[155px] md:max-w-[185px] mx-auto flex justify-center">
+                        {/* Score / College Pill: Below Photo, Multi-line Wrapped, Never Overlaps Face */}
+                        <div className="mt-2 sm:mt-2.5 w-full max-w-[125px] sm:max-w-[155px] md:max-w-[185px] mx-auto flex justify-center">
                           <span
-                            className="inline-block text-white text-[8.5px] sm:text-[10px] md:text-[11px] font-bold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-xl shadow-md border border-white tracking-tight text-center leading-tight whitespace-normal [overflow-wrap:anywhere] break-words line-clamp-3 w-full"
+                            className="inline-block text-white text-[8.5px] sm:text-[10px] md:text-[11px] font-bold px-2 sm:px-2.5 py-1 rounded-xl shadow-xs border border-white tracking-tight text-center leading-tight whitespace-normal [overflow-wrap:anywhere] break-words line-clamp-3 w-full"
                             style={{ backgroundColor: cardThemeColor }}
                             title={student.score}
                           >
@@ -520,7 +664,7 @@ export default function AcademicExcellenceResults({
                           {student.name}
                         </h5>
 
-                        {/* Student Designation (if available) */}
+                        {/* Student Designation */}
                         {student.designation && (
                           <p className="text-[10px] sm:text-xs font-medium text-neutral-600 line-clamp-2 mt-0.5 w-full px-0.5 leading-tight" title={student.designation}>
                             {student.designation}
