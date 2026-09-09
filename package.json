@@ -1,5 +1,6 @@
 {
-  "name": "coaching-cms",
+  "name": "hodu-academy",
+  "description": "Hodu Academy — Your Global Classroom",
   "version": "0.1.0",
   "private": true,
   "scripts": {
