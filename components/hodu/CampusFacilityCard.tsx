@@ -72,8 +72,10 @@ export default function CampusFacilityCard({ item }: CampusFacilityCardProps) {
               onError={(e) => {
                 const target = e.currentTarget
                 if (target.src.includes('googleusercontent.com/d/')) {
-                  const id = target.src.split('/d/')[1]
-                  target.src = `/api/proxy-image?id=${id}`
+                  const rawId = target.src.split('/d/')[1]?.split('=')[0]?.split('?')[0]
+                  if (rawId) {
+                    target.src = `/api/proxy-image?id=${rawId}`
+                  }
                 }
               }}
               className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-108"

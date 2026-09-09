@@ -18,24 +18,30 @@ export function normalizeImageUrl(url: string | null | undefined): string {
     trimmed = 'https://' + trimmed
   }
 
-  // Google Drive sharing links & googleusercontent links -> Direct Google Edge CDN with WebP optimization
+  // Extract Google Drive file IDs from all known formats including /api/proxy-image?id=...
   const gDriveMatch = trimmed.match(
-    /(?:drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=view&)?id=)|docs\.google\.com\/(?:file\/d\/|open\?id=)|googleusercontent\.com\/d\/)([a-zA-Z0-9_-]{20,})/
+    /(?:drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=view&)?id=)|docs\.google\.com\/(?:file\/d\/|open\?id=)|googleusercontent\.com\/d\/|proxy-image\?(?:.*&)?id=)([a-zA-Z0-9_-]{20,})/i
   )
   if (gDriveMatch && gDriveMatch[1]) {
     const fileId = gDriveMatch[1]
-    return `https://lh3.googleusercontent.com/d/${fileId}=w1600-rw`
+    return `https://lh3.googleusercontent.com/d/${fileId}=w1200-rw`
   }
 
   // Already a googleusercontent link with custom params
-  if (trimmed.includes('googleusercontent.com/d/') && !trimmed.includes('=')) {
-    return `${trimmed}=w1600-rw`
+  if (trimmed.includes('googleusercontent.com/d/')) {
+    if (!trimmed.includes('=')) {
+      return `${trimmed}=w1200-rw`
+    }
+    return trimmed
   }
 
   // Unsplash links: Ensure fast WebP compression and format
-  if (trimmed.includes('images.unsplash.com') && !trimmed.includes('auto=format')) {
+  if (trimmed.includes('images.unsplash.com')) {
     const separator = trimmed.includes('?') ? '&' : '?'
-    return `${trimmed}${separator}auto=format&fit=crop&q=80`
+    if (!trimmed.includes('auto=format')) {
+      return `${trimmed}${separator}auto=format&fit=crop&q=80`
+    }
+    return trimmed
   }
 
   // Dropbox links: convert ?dl=0 to direct content link
