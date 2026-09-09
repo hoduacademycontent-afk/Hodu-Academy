@@ -259,6 +259,15 @@ export default function HoduNavbar({
               Offline
             </Link>
 
+            <Link
+              href="/ptm"
+              className={`text-[13.5px] xl:text-[15px] font-bold transition-colors ${
+                pathname === '/ptm' || pathname === '/ptm-gallery' || pathname === '/gallery' ? 'text-[#7A001F] font-black' : 'text-neutral-800 hover:text-[#7A001F]'
+              }`}
+            >
+              Gallery
+            </Link>
+
             {/* Learner's Hub Mega Menu Dropdown */}
             <div
               ref={hubRef}
@@ -423,6 +432,16 @@ export default function HoduNavbar({
               }`}
             >
               Offline
+            </Link>
+
+            <Link
+              href="/ptm"
+              onClick={() => setMobileOpen(false)}
+              className={`block px-4 py-2.5 rounded-xl text-sm font-bold transition-colors ${
+                pathname === '/ptm' || pathname === '/ptm-gallery' || pathname === '/gallery' ? 'bg-neutral-100 text-[#7A001F]' : 'text-neutral-800 hover:bg-neutral-50'
+              }`}
+            >
+              Gallery
             </Link>
 
             {/* Mobile Learner's Hub Accordion */}
