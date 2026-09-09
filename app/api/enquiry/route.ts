@@ -43,24 +43,35 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Store in Supabase cms_leads database
-    const supabase = await createClient()
-    const { data: insertedLead, error: dbError } = await supabase
-      .from('cms_leads')
-      .insert({
-        site_id: HODU_SITE_ID,
-        name: cleanName,
-        phone: cleanPhone,
-        class_level: cleanClass,
-        target_exam: cleanExam,
-        city: cleanCity,
-        message: storedMessage || null,
-        status: 'new',
-      })
-      .select('id')
-      .single()
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bgaidfuzvcrjbxmpfvym.supabase.co'
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+    
+    let insertedLead: any = null
+    try {
+      const { createClient: createAdminClient } = await import('@supabase/supabase-js')
+      const supabase = createAdminClient(supabaseUrl, supabaseKey)
+      const { data, error: dbError } = await supabase
+        .from('cms_leads')
+        .insert({
+          site_id: HODU_SITE_ID,
+          name: cleanName,
+          phone: cleanPhone,
+          class_level: cleanClass,
+          target_exam: cleanExam,
+          city: cleanCity,
+          message: storedMessage || null,
+          status: 'new',
+        })
+        .select('*')
+        .single()
 
-    if (dbError) {
-      console.error('[Database Insert Error]:', dbError)
+      if (dbError) {
+        console.error('[Database Insert Error]:', dbError)
+      } else {
+        insertedLead = data
+      }
+    } catch (dbErr) {
+      console.error('[Database Exception]:', dbErr)
     }
 
     // 2. Dispatch instant email notification via Resend

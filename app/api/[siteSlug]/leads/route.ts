@@ -24,20 +24,28 @@ export async function POST(req: NextRequest) {
       storedMsg = storedMsg ? `[Email: ${cleanEmail}] ${storedMsg}` : `[Email: ${cleanEmail}]`
     }
 
-    const supabase = await createClient()
-    const { error } = await supabase.from('cms_leads').insert({
-      name: cleanName,
-      phone: cleanPhone,
-      class_level: cleanClass,
-      target_exam: cleanExam,
-      city: cleanCity,
-      message: storedMsg || null,
-      site_id,
-      status: 'new',
-    })
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bgaidfuzvcrjbxmpfvym.supabase.co'
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 
-    if (error) {
-      console.error('Lead insert error:', error)
+    try {
+      const { createClient: createAdminClient } = await import('@supabase/supabase-js')
+      const supabase = createAdminClient(supabaseUrl, supabaseKey)
+      const { error } = await supabase.from('cms_leads').insert({
+        name: cleanName,
+        phone: cleanPhone,
+        class_level: cleanClass,
+        target_exam: cleanExam,
+        city: cleanCity,
+        message: storedMsg || null,
+        site_id,
+        status: 'new',
+      })
+
+      if (error) {
+        console.error('Lead insert error:', error)
+      }
+    } catch (dbErr) {
+      console.error('Lead DB exception:', dbErr)
     }
 
     // Dispatch email notification via Resend
