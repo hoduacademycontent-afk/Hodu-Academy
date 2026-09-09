@@ -1413,12 +1413,12 @@ export default function AcademicDecksManager() {
                           <label className="block text-[11px] font-bold text-neutral-700 mb-1">
                             Score / Percentage / Rank (e.g. 99.6% / AIR 142)
                           </label>
-                          <input
-                            type="text"
+                          <textarea
+                            rows={2}
                             value={editingDeck.topRanker?.score || ''}
                             onChange={(e) => setTopRanker('score', e.target.value)}
-                            placeholder="e.g. 99.6%"
-                            className="w-full text-xs font-black border border-neutral-300 rounded-xl px-3 py-2 bg-white text-brand-maroon"
+                            placeholder="e.g. 99.6% / Imperial College London"
+                            className="w-full text-xs font-black border border-neutral-300 rounded-xl px-3 py-1.5 bg-white text-brand-maroon resize-y leading-tight"
                           />
                         </div>
                       </div>
@@ -1575,12 +1575,12 @@ export default function AcademicDecksManager() {
                             />
                           </div>
 
-                          <input
-                            type="text"
+                          <textarea
+                            rows={2}
                             value={student.score}
                             onChange={(e) => setPerformer(sIdx, 'score', e.target.value)}
-                            placeholder="College / Score (e.g. BITS Pilani / 98.4%)"
-                            className="w-full text-xs font-black text-brand-maroon border border-neutral-300 rounded-lg px-2 py-1 bg-white"
+                            placeholder="College / Score (e.g. Imperial College London / 98.4%)"
+                            className="w-full text-xs font-black text-brand-maroon border border-neutral-300 rounded-lg px-2 py-1 bg-white resize-y leading-tight"
                           />
 
                           <input
