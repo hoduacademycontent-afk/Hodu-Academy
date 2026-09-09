@@ -29,6 +29,7 @@ import CampusFacilitiesSection from '@/components/hodu/CampusFacilitiesSection'
 import LifeAtHoduCarousel from '@/components/hodu/LifeAtHoduCarousel'
 import { parseMediaUrl } from '@/lib/homeCarousel'
 import { normalizeImageUrl } from '@/lib/imageUtils'
+import VideoWithAntigravity from '@/components/hodu/VideoWithAntigravity'
 
 export const dynamic = 'force-dynamic'
 
@@ -346,16 +347,14 @@ export default async function OfflinePage() {
               </p>
             </div>
 
-            {/* Video Player Frame with Cinema Border & Glow */}
-            <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl sm:shadow-2xl border-2 border-brand-maroon/20 bg-black aspect-video max-w-5xl mx-auto w-full group">
-              <iframe
-                src={videoEmbedUrl}
-                title="Hodu Academy Jaipur Campus Tour"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                className="absolute inset-0 w-full h-full border-0"
-              />
-            </div>
+            {/* Video Player Frame with Antigravity 3D Particle Simulation & Cinema Border */}
+            <VideoWithAntigravity
+              videoEmbedUrl={videoEmbedUrl}
+              title="Hodu Academy Jaipur Campus Tour"
+              particleCount={260}
+              particleColor="#FF85C0"
+              particleShape="capsule"
+            />
           </ScrollReveal>
         </div>
       </section>

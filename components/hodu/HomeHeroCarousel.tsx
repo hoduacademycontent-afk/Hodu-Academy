@@ -1,9 +1,15 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { CarouselSlide, parseMediaUrl } from '@/lib/homeCarousel'
 import { normalizeImageUrl } from '@/lib/imageUtils'
+
+const Antigravity = dynamic(() => import('@/components/ui/Antigravity'), {
+  ssr: false,
+  loading: () => null,
+})
 
 interface HomeHeroCarouselProps {
   ctaText?: string
@@ -94,33 +100,49 @@ export default function HomeHeroCarousel({
               }`}
             >
               {isVideo ? (
-                media.type === 'google_drive' ? (
-                  <iframe
-                    src={isCurrent ? media.embedUrl : ''}
-                    title={`Google Drive Video Slide ${idx + 1}`}
-                    className="w-full h-full border-0 absolute inset-0 bg-black"
-                    allow="autoplay; encrypted-media; fullscreen"
-                    allowFullScreen
-                  />
-                ) : media.type === 'youtube' ? (
-                  <iframe
-                    src={isCurrent ? media.embedUrl : ''}
-                    title={`YouTube Video Slide ${idx + 1}`}
-                    className="w-full h-full border-0 absolute inset-0 bg-black"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                ) : (
-                  <video
-                    src={s.videoUrl || s.image}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    controls
-                    className="w-full h-full object-cover absolute inset-0 bg-black"
-                  />
-                )
+                <>
+                  {media.type === 'google_drive' ? (
+                    <iframe
+                      src={isCurrent ? media.embedUrl : ''}
+                      title={`Google Drive Video Slide ${idx + 1}`}
+                      className="w-full h-full border-0 absolute inset-0 bg-black"
+                      allow="autoplay; encrypted-media; fullscreen"
+                      allowFullScreen
+                    />
+                  ) : media.type === 'youtube' ? (
+                    <iframe
+                      src={isCurrent ? media.embedUrl : ''}
+                      title={`YouTube Video Slide ${idx + 1}`}
+                      className="w-full h-full border-0 absolute inset-0 bg-black"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  ) : (
+                    <video
+                      src={s.videoUrl || s.image}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      controls
+                      className="w-full h-full object-cover absolute inset-0 bg-black"
+                    />
+                  )}
+                  {isCurrent && (
+                    <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden">
+                      <Antigravity
+                        count={180}
+                        color="#FF85C0"
+                        particleShape="capsule"
+                        particleSize={1.5}
+                        magnetRadius={10}
+                        ringRadius={7}
+                        autoAnimate={true}
+                        fieldStrength={10}
+                      />
+                    </div>
+                  )}
+                </>
               ) : s.linkUrl ? (
                 <a
                   href={s.linkUrl}
