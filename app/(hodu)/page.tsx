@@ -180,6 +180,10 @@ export default async function HomePage() {
       const parsedDecks = dRes.value.data.map(row => {
         let p: any = {}
         try { p = typeof row.caption === 'string' ? JSON.parse(row.caption) : (row.caption || {}) } catch {}
+        const hasTopper = p.has_spotlight_topper !== undefined
+          ? p.has_spotlight_topper
+          : !!(p.topRanker?.name?.trim())
+
         return {
           id: row.id,
           tabLabel: p.tabLabel || 'Result Deck',
@@ -190,6 +194,7 @@ export default async function HomePage() {
           bgVia: p.bgVia || '#FFF8E1',
           bgTo: p.bgTo || '#FFF3CD',
           is_featured_on_home: p.is_featured_on_home !== false,
+          has_spotlight_topper: hasTopper,
           topRanker: p.topRanker || { name: 'Topper Name', score: '99.6%', photo: row.image_url || '', initials: 'TN' },
           performers: Array.isArray(p.performers) ? p.performers : [],
         }

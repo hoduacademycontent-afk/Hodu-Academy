@@ -397,10 +397,11 @@ export default function AcademicExcellenceResults({
                       </div>
 
                       {/* Large Score Pill Below Photo */}
-                      <div className="absolute -bottom-3 sm:-bottom-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap z-20">
+                      <div className="absolute -bottom-3 sm:-bottom-3.5 left-1/2 -translate-x-1/2 z-20 w-[110%] max-w-[200px] sm:max-w-[260px] flex justify-center">
                         <span
-                          className="inline-block text-white text-sm sm:text-lg md:text-xl font-black px-5 sm:px-7 py-1 sm:py-1.5 rounded-full shadow-xl border-2 border-white tracking-wide"
+                          className="inline-block text-white text-xs sm:text-base md:text-lg font-black px-4 sm:px-6 py-1 sm:py-1.5 rounded-full shadow-xl border-2 border-white tracking-wide text-center truncate max-w-full"
                           style={{ backgroundColor: cardThemeColor }}
+                          title={activeDeck.topRanker?.score}
                         >
                           {activeDeck.topRanker?.score}
                         </span>
@@ -408,27 +409,27 @@ export default function AcademicExcellenceResults({
                     </div>
 
                     {/* Student Name */}
-                    <div className="mt-5 sm:mt-7 space-y-0.5">
-                      <h4 className="font-serif-editorial text-base sm:text-lg md:text-xl font-bold text-neutral-900">
+                    <div className="mt-5 sm:mt-7 space-y-0.5 w-full px-2">
+                      <h4 className="font-serif-editorial text-base sm:text-lg md:text-xl font-bold text-neutral-900 line-clamp-1">
                         {activeDeck.topRanker?.name}
                       </h4>
-                      <p className="text-[11px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider">
+                      <p className="text-[11px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider line-clamp-1" title={activeDeck.topRanker?.designation}>
                         {activeDeck.topRanker?.designation || 'Batch Topper'}
                       </p>
                     </div>
                   </div>
 
-                  {/* ─── Right Grid: Achievers (Larger Responsive Grid on Mobile & Desktop) ─── */}
+                  {/* ─── Right Grid: Achievers (Centered & Non-overlapping) ─── */}
                   <div className="lg:col-span-9">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-y-6 sm:gap-y-10 gap-x-3 sm:gap-x-5">
+                    <div className="flex flex-wrap justify-center items-start gap-y-6 sm:gap-y-10 gap-x-3 sm:gap-x-6">
                       {activeDeck.performers?.map((student, sIdx) => (
                         <div
                           key={sIdx}
-                          className="flex flex-col items-center text-center group cursor-pointer"
+                          className="flex flex-col items-center text-center group cursor-pointer w-24 sm:w-28 md:w-32 shrink-0"
                         >
                           {/* Student Circle Portrait */}
                           <div className="relative">
-                            <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-26 md:h-26 lg:w-28 lg:h-28 rounded-full bg-gradient-to-b from-sky-100 to-sky-200/60 p-1.5 shadow-sm border-2 border-sky-300/60 overflow-hidden flex items-center justify-center">
+                            <div className="w-18 h-18 sm:w-22 sm:h-22 md:w-24 md:h-24 lg:w-26 lg:h-26 rounded-full bg-gradient-to-b from-sky-100 to-sky-200/60 p-1.5 shadow-sm border-2 border-sky-300/60 overflow-hidden flex items-center justify-center">
                               {student.photo ? (
                                 <img
                                   src={normalizeImageUrl(student.photo)}
@@ -438,7 +439,7 @@ export default function AcademicExcellenceResults({
                                 />
                               ) : (
                                 <div
-                                  className="w-full h-full rounded-full text-white font-bold text-sm sm:text-base flex items-center justify-center"
+                                  className="w-full h-full rounded-full text-white font-bold text-xs sm:text-sm flex items-center justify-center"
                                   style={{ backgroundColor: cardThemeColor }}
                                 >
                                   {student.initials || student.name.slice(0, 2).toUpperCase()}
@@ -446,11 +447,12 @@ export default function AcademicExcellenceResults({
                               )}
                             </div>
 
-                            {/* Score Pill */}
-                            <div className="absolute -bottom-2.5 sm:-bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap z-10">
+                            {/* Score Pill: strictly width-constrained, never overlaps neighboring pills */}
+                            <div className="absolute -bottom-2.5 sm:-bottom-3 left-1/2 -translate-x-1/2 z-10 w-[120%] max-w-[110px] sm:max-w-[130px] flex justify-center">
                               <span
-                                className="inline-block text-white text-xs sm:text-sm font-black px-2.5 sm:px-3.5 py-0.5 sm:py-1 rounded-full shadow-md border-2 border-white tracking-tight"
+                                className="inline-block text-white text-[9px] sm:text-[11px] font-black px-2 sm:px-2.5 py-0.5 rounded-full shadow-md border-2 border-white tracking-tight text-center truncate w-full max-w-full"
                                 style={{ backgroundColor: cardThemeColor }}
+                                title={student.score}
                               >
                                 {student.score}
                               </span>
@@ -458,9 +460,16 @@ export default function AcademicExcellenceResults({
                           </div>
 
                           {/* Student Name */}
-                          <h5 className="mt-4 sm:mt-5 text-xs sm:text-sm font-bold text-neutral-900 line-clamp-1 group-hover:opacity-80 transition-opacity">
+                          <h5 className="mt-4 sm:mt-5 text-[11px] sm:text-xs md:text-sm font-bold text-neutral-900 line-clamp-1 group-hover:opacity-80 transition-opacity w-full px-1">
                             {student.name}
                           </h5>
+
+                          {/* Student Designation (if available) */}
+                          {student.designation && (
+                            <p className="text-[9px] sm:text-[10px] font-medium text-neutral-600 line-clamp-1 mt-0.5 w-full px-1" title={student.designation}>
+                              {student.designation}
+                            </p>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -468,17 +477,17 @@ export default function AcademicExcellenceResults({
 
                 </div>
               ) : (
-                /* ─── Full-Width Achievers Grid (When No Spotlight Topper / College Placements) ─── */
+                /* ─── Full-Width Achievers Grid (When No Spotlight Topper / College Placements / Olympiads) ─── */
                 <div className="relative z-10 w-full px-2 sm:px-4">
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-y-6 sm:gap-y-10 gap-x-3 sm:gap-x-6 justify-center items-center">
+                  <div className="flex flex-wrap justify-center items-start gap-y-8 sm:gap-y-10 gap-x-4 sm:gap-x-8 md:gap-x-10 max-w-6xl mx-auto">
                     {activeDeck.performers?.map((student, sIdx) => (
                       <div
                         key={sIdx}
-                        className="flex flex-col items-center text-center group cursor-pointer"
+                        className="flex flex-col items-center text-center group cursor-pointer w-28 sm:w-36 md:w-44 shrink-0"
                       >
                         {/* Student Circle Portrait */}
                         <div className="relative">
-                          <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-26 md:h-26 lg:w-28 lg:h-28 rounded-full bg-gradient-to-b from-sky-100 to-sky-200/60 p-1.5 shadow-sm border-2 border-sky-300/60 overflow-hidden flex items-center justify-center">
+                          <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full bg-gradient-to-b from-sky-100 to-sky-200/60 p-1.5 shadow-sm border-2 border-sky-300/60 overflow-hidden flex items-center justify-center">
                             {student.photo ? (
                               <img
                                 src={normalizeImageUrl(student.photo)}
@@ -496,11 +505,12 @@ export default function AcademicExcellenceResults({
                             )}
                           </div>
 
-                          {/* Score Pill */}
-                          <div className="absolute -bottom-2.5 sm:-bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap z-10">
+                          {/* Score Pill: strictly width-constrained, never overlaps */}
+                          <div className="absolute -bottom-2.5 sm:-bottom-3 left-1/2 -translate-x-1/2 z-10 w-[120%] max-w-[130px] sm:max-w-[160px] flex justify-center">
                             <span
-                              className="inline-block text-white text-xs sm:text-sm font-black px-2.5 sm:px-3.5 py-0.5 sm:py-1 rounded-full shadow-md border-2 border-white tracking-tight"
+                              className="inline-block text-white text-[9px] sm:text-[11px] font-black px-2 sm:px-3 py-0.5 rounded-full shadow-md border-2 border-white tracking-tight text-center truncate w-full max-w-full"
                               style={{ backgroundColor: cardThemeColor }}
+                              title={student.score}
                             >
                               {student.score}
                             </span>
@@ -508,9 +518,16 @@ export default function AcademicExcellenceResults({
                         </div>
 
                         {/* Student Name */}
-                        <h5 className="mt-4 sm:mt-5 text-xs sm:text-sm font-bold text-neutral-900 line-clamp-1 group-hover:opacity-80 transition-opacity">
+                        <h5 className="mt-4 sm:mt-5 text-xs sm:text-sm font-bold text-neutral-900 line-clamp-1 group-hover:opacity-80 transition-opacity w-full px-1">
                           {student.name}
                         </h5>
+
+                        {/* Student Designation (if available) */}
+                        {student.designation && (
+                          <p className="text-[10px] sm:text-xs font-medium text-neutral-600 line-clamp-2 mt-0.5 w-full px-1" title={student.designation}>
+                            {student.designation}
+                          </p>
+                        )}
                       </div>
                     ))}
                   </div>

@@ -38,6 +38,10 @@ export default async function ResultsPage() {
       customDecks = data.map(row => {
         try {
           const parsed = JSON.parse(row.caption || '{}')
+          const hasTopper = parsed.has_spotlight_topper !== undefined
+            ? parsed.has_spotlight_topper
+            : !!(parsed.topRanker?.name?.trim())
+
           return {
             id: row.id,
             tabLabel: parsed.tabLabel || row.title || 'Result',
@@ -48,6 +52,7 @@ export default async function ResultsPage() {
             bgVia: parsed.bgVia || '#FFF8E1',
             bgTo: parsed.bgTo || '#FFF3CD',
             is_featured_on_home: parsed.is_featured_on_home !== false,
+            has_spotlight_topper: hasTopper,
             topRanker: parsed.topRanker || {
               name: 'Topper Name',
               score: '99.6%',
