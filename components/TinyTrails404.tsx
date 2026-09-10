@@ -5,6 +5,19 @@ import { ArrowLeft, Menu, X } from 'lucide-react'
 
 const navItems = ['About Us', 'Programs', 'Reviews', 'FAQ', 'Contacts']
 
+// 4-point Sparkle Star SVG
+function SparkleStar({ className = 'w-6 h-6' }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={`text-white drop-shadow-sm pointer-events-none ${className}`}
+    >
+      <path d="M12 0L14.7 9.3L24 12L14.7 14.7L12 24L9.3 14.7L0 12L9.3 9.3L12 0Z" />
+    </svg>
+  )
+}
+
 export default function TinyTrails404() {
   const [menuOpen, setMenuOpen] = useState(false)
   const textRef = useRef<HTMLDivElement>(null)
@@ -40,8 +53,8 @@ export default function TinyTrails404() {
     <div
       className="fixed inset-0 w-full h-screen overflow-hidden flex flex-col select-none z-[99999]"
       style={{
-        background: 'linear-gradient(to bottom, #FF8233, #FDAC55)',
-        fontFamily: "'Inter', sans-serif",
+        background: 'linear-gradient(to bottom, #FF8233 0%, #FDAC55 100%)',
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
       }}
     >
       {/* Load Inter font from Google Fonts */}
@@ -58,9 +71,9 @@ export default function TinyTrails404() {
       <div
         className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden z-0"
         style={{
-          opacity: 0.8,
-          maskImage: 'linear-gradient(to bottom, black 40%, transparent 95%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, black 40%, transparent 95%)',
+          opacity: 0.82,
+          maskImage: 'linear-gradient(to bottom, black 35%, transparent 95%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, black 35%, transparent 95%)',
         }}
       >
         <div className="relative flex items-center justify-center w-full h-full">
@@ -105,12 +118,12 @@ export default function TinyTrails404() {
         </a>
 
         {/* Desktop Nav Links (Center/Right): Pill buttons */}
-        <nav className="hidden md:flex items-center gap-1">
+        <nav className="hidden md:flex items-center gap-1.5">
           {navItems.map(item => (
             <a
               key={item}
               href="/"
-              className="px-4 py-1.5 text-sm font-medium rounded-full bg-white text-[#F16524] hover:opacity-90 transition-colors cursor-pointer shadow-xs"
+              className="px-4 py-1.5 text-sm font-medium rounded-full bg-white text-[#F16524] hover:opacity-90 transition-all cursor-pointer shadow-2xs hover:scale-[1.02]"
             >
               {item}
             </a>
@@ -120,16 +133,16 @@ export default function TinyTrails404() {
         {/* Menu Button (Right): Pill button with Menu icon */}
         <button
           onClick={() => setMenuOpen(true)}
-          className="inline-flex items-center gap-1.5 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full text-white bg-[#F16524] hover:opacity-90 transition-colors shadow-sm active:scale-95 cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full text-white bg-[#F16524] hover:opacity-90 transition-all shadow-sm active:scale-95 cursor-pointer"
           aria-label="Open menu"
         >
           <Menu className="w-4 h-4" />
-          <span className="text-sm font-medium hidden sm:inline">Menu</span>
+          <span className="text-sm font-medium hidden sm:inline ml-0.5">Menu</span>
         </button>
       </header>
 
       {/* =========================================================================
-          3. CENTER ANIMATED VIDEO (Shifted Upward)
+          3. CENTER ANIMATED VIDEO (Flawless Multiply Blend Mode + Sparkles)
          ========================================================================= */}
       <div
         className="absolute inset-0 flex items-center justify-center pointer-events-none z-10"
@@ -137,31 +150,50 @@ export default function TinyTrails404() {
           marginTop: 'calc(-6vh - 40px)',
         }}
       >
-        <div className="w-[120vw] h-[85vh] sm:w-[70vw] sm:h-[70vh] md:w-[62vw] md:h-[78vh] flex items-center justify-center">
+        <div className="relative w-[120vw] h-[85vh] sm:w-[70vw] sm:h-[70vh] md:w-[62vw] md:h-[78vh] flex items-center justify-center">
+          
+          {/* Sparkle Stars */}
+          <div className="absolute top-[28%] right-[22%] sm:right-[26%] animate-pulse duration-1000">
+            <SparkleStar className="w-6 h-6 sm:w-8 sm:h-8 opacity-90" />
+          </div>
+          <div className="absolute top-[38%] right-[18%] sm:right-[22%] animate-pulse delay-300">
+            <SparkleStar className="w-3.5 h-3.5 sm:w-4 sm:h-4 opacity-75" />
+          </div>
+          <div className="absolute bottom-[28%] left-[20%] sm:left-[24%] animate-pulse delay-500">
+            <SparkleStar className="w-4 h-4 sm:w-5 sm:h-5 opacity-80" />
+          </div>
+
+          {/* Video with multiply blend mode & contrast filter for 100% transparent background */}
           <video
             autoPlay
             loop
             muted
             playsInline
             src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260713_234424_b1332b69-2e69-4302-8dbc-40f86846afbd.mp4"
-            className="w-full h-full object-contain pointer-events-none mix-blend-darken"
+            style={{
+              mixBlendMode: 'multiply',
+            }}
+            className="w-full h-full object-contain pointer-events-none filter contrast-[1.03] brightness-[1.01]"
           />
         </div>
       </div>
 
       {/* =========================================================================
-          4. BOTTOM CONTENT (Heading + Back to Home CTA)
+          4. BOTTOM CONTENT (Heading + Subheading + Go Back Home CTA)
          ========================================================================= */}
-      <main className="relative z-30 mt-auto pb-8 sm:pb-16 flex flex-col items-center text-center px-4">
-        <h1 className="text-white text-lg sm:text-xl md:text-2xl font-medium mb-3 sm:mb-4 tracking-tight">
+      <main className="relative z-30 mt-auto pb-6 sm:pb-12 flex flex-col items-center text-center px-4">
+        <h1 className="text-white text-lg sm:text-xl md:text-2xl font-semibold tracking-tight">
           Oops, something went wrong!
         </h1>
+        <p className="text-white/90 text-xs sm:text-sm md:text-base font-normal mt-1 mb-3.5 sm:mb-4 tracking-normal">
+          This page does not exist.
+        </p>
         <a
           href="/"
-          className="inline-flex items-center gap-2 px-6 py-3 sm:px-8 sm:py-4 rounded-full text-white font-semibold text-sm sm:text-base bg-[#F16524] hover:scale-105 hover:shadow-lg transition-all active:scale-95 shadow-md cursor-pointer"
+          className="inline-flex items-center gap-2 px-6 py-2.5 sm:px-7 sm:py-3 rounded-full text-white font-semibold text-xs sm:text-sm md:text-base bg-[#F16524] hover:scale-105 hover:shadow-lg transition-all active:scale-95 shadow-md cursor-pointer"
         >
-          <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-          <span>Back to Home</span>
+          <ArrowLeft className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+          <span>Go back home</span>
         </a>
       </main>
 
@@ -247,7 +279,7 @@ export default function TinyTrails404() {
               className="w-full py-4 rounded-full bg-white font-semibold text-base text-[#F16524] hover:scale-[1.02] flex items-center justify-center gap-2 shadow-lg transition-transform cursor-pointer"
             >
               <ArrowLeft className="w-5 h-5" />
-              <span>Back to Home</span>
+              <span>Go back home</span>
             </a>
           </div>
         </div>
