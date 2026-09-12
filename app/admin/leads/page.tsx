@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import AdminLayout from '@/components/admin/AdminLayout'
 import Modal from '@/components/admin/Modal'
+import { AdminTableSkeleton } from '@/components/admin/AdminSkeletons'
 import {
   Phone,
   MessageCircle,
@@ -65,6 +66,7 @@ function extractSource(lead: any): string {
 export default function LeadsPage() {
   const supabase = createClient()
   const [leads, setLeads]             = useState<any[]>([])
+  const [loading, setLoading]         = useState(true)
   const [filter, setFilter]           = useState('all')
   const [search, setSearch]           = useState('')
   const [detail, setDetail]           = useState<any | null>(null)
@@ -95,12 +97,17 @@ export default function LeadsPage() {
   }
 
   async function load() {
-    const { data } = await supabase
-      .from('cms_leads')
-      .select('*')
-      .or(`site_id.eq.${SITE_ID},site_id.is.null`)
-      .order('created_at', { ascending: false })
-    setLeads(data ?? [])
+    setLoading(true)
+    try {
+      const { data } = await supabase
+        .from('cms_leads')
+        .select('*')
+        .or(`site_id.eq.${SITE_ID},site_id.is.null`)
+        .order('created_at', { ascending: false })
+      setLeads(data ?? [])
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -346,156 +353,162 @@ export default function LeadsPage() {
         )}
       </div>
 
-      <div className="bg-white border border-[#F3DCDC] rounded-2xl overflow-hidden shadow-xs">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-[#F3DCDC] bg-[#FDF5F5]">
-                <th className="w-10 px-3 py-3 text-center">
-                  <input
-                    type="checkbox"
-                    checked={allVisibleSelected}
-                    onChange={toggleSelectAll}
-                    title="Select all visible leads"
-                    className="w-4 h-4 rounded text-[#7E0D0D] focus:ring-[#7E0D0D] border-gray-300 cursor-pointer"
-                  />
-                </th>
-                {['Student / Contact', 'Email Address', 'Exam / Curriculum', 'City & Source', 'Status', 'Follow-up', 'Date', 'Actions'].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wider">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {visible.map((l) => {
-                const overdue = l.status === 'follow-up' && l.follow_up_date && l.follow_up_date < today
-                const email = extractEmail(l)
-                const source = extractSource(l)
-                const rawPhone = (l.phone ?? '').replace(/[^\d+]/g, '')
-                const whatsappPhone = rawPhone.startsWith('+') ? rawPhone.replace('+', '') : `91${rawPhone.replace(/^0+/, '')}`
-                const isSelected = selectedIds.includes(l.id)
+      {loading ? (
+        <AdminTableSkeleton rows={8} columns={8} />
+      ) : (
+        <div className="bg-white border border-[#F3DCDC] rounded-2xl overflow-hidden shadow-xs">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[#F3DCDC] bg-[#FDF5F5]">
+                  <th className="w-10 px-3 py-3 text-center">
+                    <input
+                      type="checkbox"
+                      checked={allVisibleSelected}
+                      onChange={toggleSelectAll}
+                      title="Select all visible leads"
+                      className="w-4 h-4 rounded text-[#7E0D0D] focus:ring-[#7E0D0D] border-gray-300 cursor-pointer"
+                    />
+                  </th>
+                  {['Student / Contact', 'Email Address', 'Exam / Curriculum', 'City & Source', 'Status', 'Follow-up', 'Date', 'Actions'].map((h) => (
+                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-[#64748b] uppercase tracking-wider">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {visible.map((l) => {
+                  const overdue = l.status === 'follow-up' && l.follow_up_date && l.follow_up_date < today
+                  const email = extractEmail(l)
+                  const source = extractSource(l)
+                  const rawPhone = (l.phone ?? '').replace(/[^\d+]/g, '')
+                  const whatsappPhone = rawPhone.startsWith('+') ? rawPhone.replace('+', '') : `91${rawPhone.replace(/^0+/, '')}`
+                  const isSelected = selectedIds.includes(l.id)
 
-                return (
-                  <tr key={l.id} className={`border-b border-[#F3DCDC] last:border-0 transition-colors ${isSelected ? 'bg-red-50/40' : 'hover:bg-[#FDF5F5]/60'}`}>
-                    {/* Checkbox */}
-                    <td className="w-10 px-3 py-3 text-center">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => toggleSelectLead(l.id)}
-                        className="w-4 h-4 rounded text-[#7E0D0D] focus:ring-[#7E0D0D] border-gray-300 cursor-pointer"
-                      />
-                    </td>
+                  return (
+                    <tr key={l.id} className={`border-b border-[#F3DCDC] last:border-0 transition-colors ${isSelected ? 'bg-red-50/40' : 'hover:bg-[#FDF5F5]/60'}`}>
+                      {/* Checkbox */}
+                      <td className="w-10 px-3 py-3 text-center">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleSelectLead(l.id)}
+                          className="w-4 h-4 rounded text-[#7E0D0D] focus:ring-[#7E0D0D] border-gray-300 cursor-pointer"
+                        />
+                      </td>
 
-                    {/* Name & Phone */}
-                    <td className="px-4 py-3">
-                      <div>
-                        <button onClick={() => openDetail(l)} className="font-bold text-[#1B2A44] hover:text-[#7E0D0D] text-left">
-                          {l.name}
-                          {l.notes && <NotebookPen size={11} className="inline ml-1.5 text-amber-600" />}
-                        </button>
-                        <div className="flex items-center gap-2 mt-0.5 text-xs text-[#64748b]">
-                          <span>{l.phone}</span>
-                          {l.phone && !l.phone.includes('@') && (
-                            <>
-                              <a href={`tel:${l.phone}`} title="Call Student" className="text-[#7E0D0D] hover:scale-110 transition-transform"><Phone size={11} /></a>
-                              <a href={`https://wa.me/${whatsappPhone}`} target="_blank" rel="noreferrer" title="Chat on WhatsApp" className="text-green-600 hover:scale-110 transition-transform"><MessageCircle size={11} /></a>
-                            </>
-                          )}
+                      {/* Name & Phone */}
+                      <td className="px-4 py-3">
+                        <div>
+                          <button
+                            onClick={() => openDetail(l)}
+                            className="font-bold text-[#1B2A44] hover:text-[#7E0D0D] transition-colors text-left"
+                          >
+                            {l.name}
+                          </button>
+                          <div className="flex items-center gap-1 text-xs text-[#64748b] mt-0.5">
+                            <span className="font-mono">{l.phone ?? '—'}</span>
+                            {l.phone && (
+                              <>
+                                <a href={`tel:${l.phone}`} title="Call Student" className="text-[#7E0D0D] hover:scale-110 transition-transform"><Phone size={11} /></a>
+                                <a href={`https://wa.me/${whatsappPhone}`} target="_blank" rel="noreferrer" title="Chat on WhatsApp" className="text-green-600 hover:scale-110 transition-transform"><MessageCircle size={11} /></a>
+                              </>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* Email */}
-                    <td className="px-4 py-3 text-xs">
-                      {email ? (
-                        <a href={`mailto:${email}`} className="text-sky-700 hover:text-sky-900 font-medium inline-flex items-center gap-1">
-                          <Mail size={11} className="shrink-0" /> {email}
-                        </a>
-                      ) : (
-                        <span className="text-[#94a3b8] italic">—</span>
-                      )}
-                    </td>
+                      {/* Email */}
+                      <td className="px-4 py-3 text-xs">
+                        {email ? (
+                          <a href={`mailto:${email}`} className="text-sky-700 hover:text-sky-900 font-medium inline-flex items-center gap-1">
+                            <Mail size={11} className="shrink-0" /> {email}
+                          </a>
+                        ) : (
+                          <span className="text-[#94a3b8] italic">—</span>
+                        )}
+                      </td>
 
-                    {/* Target Exam & Class */}
-                    <td className="px-4 py-3 text-xs">
-                      {l.target_exam?.toLowerCase().includes('faculty') ? (
-                        <div className="flex flex-col items-start gap-0.5">
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded">
-                            👨‍🏫 Faculty Application
+                      {/* Target Exam & Class */}
+                      <td className="px-4 py-3 text-xs">
+                        {l.target_exam?.toLowerCase().includes('faculty') ? (
+                          <div className="flex flex-col items-start gap-0.5">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded">
+                              👨‍🏫 Faculty Application
+                            </span>
+                            <span className="font-semibold text-[#1B2A44]">{l.class_level || 'Educator'}</span>
+                          </div>
+                        ) : (
+                          <>
+                            <p className="font-semibold text-[#1B2A44]">{l.target_exam ?? '—'}</p>
+                            {l.class_level && <p className="text-[11px] text-[#64748b]">{l.class_level}</p>}
+                          </>
+                        )}
+                      </td>
+
+                      {/* City & Source */}
+                      <td className="px-4 py-3 text-xs">
+                        <p className="text-[#1B2A44]">{l.city ?? 'Jaipur'}</p>
+                        {source && (
+                          <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded text-[10px] bg-neutral-100 text-neutral-600 border border-neutral-200 max-w-[140px] truncate" title={source}>
+                            {source}
                           </span>
-                          <span className="font-semibold text-[#1B2A44]">{l.class_level || 'Educator'}</span>
+                        )}
+                      </td>
+
+                      {/* Status */}
+                      <td className="px-4 py-3">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold capitalize border ${statusColors[l.status] ?? 'bg-gray-100 text-gray-500 border-gray-200'}`}>
+                          {l.status}
+                        </span>
+                      </td>
+
+                      {/* Follow-up */}
+                      <td className="px-4 py-3">
+                        {l.follow_up_date ? (
+                          <span className={`text-xs font-semibold ${overdue ? 'text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-200' : 'text-[#1B2A44]'}`}>
+                            {new Date(l.follow_up_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
+                            {overdue && ' ⚠'}
+                          </span>
+                        ) : <span className="text-xs text-[#94a3b8]">—</span>}
+                      </td>
+
+                      {/* Date */}
+                      <td className="px-4 py-3 text-xs text-[#64748b]">
+                        {new Date(l.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' })}
+                      </td>
+
+                      {/* Actions */}
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1.5">
+                          <select
+                            value={l.status}
+                            onChange={(e) => updateStatus(l.id, e.target.value)}
+                            className="text-xs border border-[#F3DCDC] rounded-lg px-2 py-1 focus:outline-none focus:border-[#7E0D0D] text-[#1B2A44] capitalize bg-white"
+                          >
+                            {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+                            {!STATUSES.includes(l.status) && <option value={l.status}>{l.status}</option>}
+                          </select>
+                          <button onClick={() => openDetail(l)} className="text-xs px-2.5 py-1 border border-[#F3DCDC] rounded-lg text-[#1B2A44] hover:bg-[#7E0D0D] hover:text-white transition-colors">
+                            Open
+                          </button>
+                          <button
+                            onClick={() => setDeleteTarget({ type: 'single', lead: l })}
+                            title="Delete Lead"
+                            className="p-1 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          >
+                            <Trash2 size={14} />
+                          </button>
                         </div>
-                      ) : (
-                        <>
-                          <p className="font-semibold text-[#1B2A44]">{l.target_exam ?? '—'}</p>
-                          {l.class_level && <p className="text-[11px] text-[#64748b]">{l.class_level}</p>}
-                        </>
-                      )}
-                    </td>
-
-                    {/* City & Source */}
-                    <td className="px-4 py-3 text-xs">
-                      <p className="text-[#1B2A44]">{l.city ?? 'Jaipur'}</p>
-                      {source && (
-                        <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded text-[10px] bg-neutral-100 text-neutral-600 border border-neutral-200 max-w-[140px] truncate" title={source}>
-                          {source}
-                        </span>
-                      )}
-                    </td>
-
-                    {/* Status */}
-                    <td className="px-4 py-3">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold capitalize border ${statusColors[l.status] ?? 'bg-gray-100 text-gray-500 border-gray-200'}`}>
-                        {l.status}
-                      </span>
-                    </td>
-
-                    {/* Follow-up */}
-                    <td className="px-4 py-3">
-                      {l.follow_up_date ? (
-                        <span className={`text-xs font-semibold ${overdue ? 'text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-200' : 'text-[#1B2A44]'}`}>
-                          {new Date(l.follow_up_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
-                          {overdue && ' ⚠'}
-                        </span>
-                      ) : <span className="text-xs text-[#94a3b8]">—</span>}
-                    </td>
-
-                    {/* Date */}
-                    <td className="px-4 py-3 text-xs text-[#64748b]">
-                      {new Date(l.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' })}
-                    </td>
-
-                    {/* Actions */}
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-1.5">
-                        <select
-                          value={l.status}
-                          onChange={(e) => updateStatus(l.id, e.target.value)}
-                          className="text-xs border border-[#F3DCDC] rounded-lg px-2 py-1 focus:outline-none focus:border-[#7E0D0D] text-[#1B2A44] capitalize bg-white"
-                        >
-                          {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-                          {!STATUSES.includes(l.status) && <option value={l.status}>{l.status}</option>}
-                        </select>
-                        <button onClick={() => openDetail(l)} className="text-xs px-2.5 py-1 border border-[#F3DCDC] rounded-lg text-[#1B2A44] hover:bg-[#7E0D0D] hover:text-white transition-colors">
-                          Open
-                        </button>
-                        <button
-                          onClick={() => setDeleteTarget({ type: 'single', lead: l })}
-                          title="Delete Lead"
-                          className="p-1 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-          {visible.length === 0 && <p className="text-center text-[#94a3b8] py-12 text-sm">No leads match the current filter.</p>}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+            {visible.length === 0 && <p className="text-center text-[#94a3b8] py-12 text-sm">No leads match the current filter.</p>}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       {deleteTarget && (

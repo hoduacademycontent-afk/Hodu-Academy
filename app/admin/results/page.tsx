@@ -7,6 +7,7 @@ import Modal from '@/components/admin/Modal'
 import ImageUpload from '@/components/admin/ImageUpload'
 import AcademicDecksManager from '@/components/admin/AcademicDecksManager'
 import { Plus, Pencil, Trash2, Trophy, Users, Layers } from 'lucide-react'
+import { AdminTableSkeleton } from '@/components/admin/AdminSkeletons'
 
 const SITE_ID = 'a1b2c3d4-1111-1111-1111-000000000002'
 const EMPTY = { student_name: '', exam: 'NEET', year: new Date().getFullYear().toString(), rank_or_marks: '', photo_url: '', course_name: '' }
@@ -15,13 +16,19 @@ export default function ResultsPage() {
   const supabase = createClient()
   const [activeTab, setActiveTab] = useState<'decks' | 'individual'>('decks')
   const [results, setResults] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const [modal, setModal]     = useState<'add' | 'edit' | null>(null)
   const [form, setForm]       = useState<any>(EMPTY)
   const [saving, setSaving]   = useState(false)
 
   async function load() {
-    const { data } = await supabase.from('cms_results').select('*').eq('site_id', SITE_ID).order('year', { ascending: false })
-    setResults(data ?? [])
+    setLoading(true)
+    try {
+      const { data } = await supabase.from('cms_results').select('*').eq('site_id', SITE_ID).order('year', { ascending: false })
+      setResults(data ?? [])
+    } finally {
+      setLoading(false)
+    }
   }
   useEffect(() => { load() }, [])
 
@@ -92,6 +99,8 @@ export default function ResultsPage() {
 
       {activeTab === 'decks' ? (
         <AcademicDecksManager />
+      ) : loading ? (
+        <AdminTableSkeleton rows={6} columns={7} />
       ) : (
         <div className="bg-white border border-[#F3DCDC] rounded-2xl overflow-hidden shadow-xs">
           <table className="w-full text-sm">

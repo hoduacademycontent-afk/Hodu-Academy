@@ -26,6 +26,7 @@ import {
 } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { normalizeImageUrl } from '@/lib/imageUtils'
+import { AdminGridSkeleton } from '@/components/admin/AdminSkeletons'
 
 const SITE_ID = 'a1b2c3d4-1111-1111-1111-000000000002'
 
@@ -45,6 +46,7 @@ const EMPTY = {
 export default function FacultyPage() {
   const supabase = createClient()
   const [faculty, setFaculty] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'All' | 'Founders' | 'Faculty' | 'OfflineFeatured'>('All')
   const [modal, setModal] = useState<'add' | 'edit' | null>(null)
   const [form, setForm] = useState<any>(EMPTY)
@@ -60,12 +62,17 @@ export default function FacultyPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   async function load() {
-    const { data } = await supabase
-      .from('cms_faculty')
-      .select('*')
-      .eq('site_id', SITE_ID)
-      .order('sort_order', { ascending: true })
-    setFaculty(data ?? [])
+    setLoading(true)
+    try {
+      const { data } = await supabase
+        .from('cms_faculty')
+        .select('*')
+        .eq('site_id', SITE_ID)
+        .order('sort_order', { ascending: true })
+      setFaculty(data ?? [])
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -235,117 +242,118 @@ export default function FacultyPage() {
         </div>
 
         {/* Faculty Grid & Table */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filtered.map((item) => {
-            const isFounder = item.is_founder || item.role?.toLowerCase().includes('founder') || item.role === 'Director'
-            const isOffline = Boolean(item.featured_offline)
-
-            return (
-              <div
-                key={item.id}
-                className="bg-white border-2 border-neutral-100 hover:border-brand-maroon/40 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
-              >
-                <div>
-                  {/* Top Tags */}
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-md ${
-                      isFounder ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-neutral-100 text-neutral-700 border border-neutral-200'
-                    }`}>
-                      {isFounder ? 'Founder / Leadership' : (item.role || 'Faculty')}
-                    </span>
-
-                    {/* Offline Page Feature Toggle */}
-                    <button
-                      onClick={() => toggleFeaturedOffline(item.id, isOffline)}
-                      className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-all flex items-center gap-1 cursor-pointer ${
-                        isOffline
-                          ? 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
-                          : 'bg-neutral-50 text-neutral-400 border-neutral-200 hover:bg-neutral-100 hover:text-neutral-700'
-                      }`}
-                      title="Click to toggle whether this teacher appears on the Offline Jaipur Campus page"
-                    >
-                      {isOffline ? <Check className="h-3 w-3 text-emerald-600" /> : <X className="h-3 w-3 text-neutral-400" />}
-                      <span>{isOffline ? 'On Offline Page' : 'Offline Hidden'}</span>
-                    </button>
-                  </div>
-
-                  {/* Profile Info */}
-                  <div className="flex items-start gap-4 mb-3">
-                    <div className="w-16 h-16 rounded-full overflow-hidden shrink-0 border-2 border-brand-maroon/20 bg-neutral-50 shadow-2xs">
-                      {item.photo_url ? (
-                        <img
-                          src={normalizeImageUrl(item.photo_url)}
-                          alt={item.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center font-bold text-brand-maroon bg-brand-blush">
-                          {item.name.slice(0, 2).toUpperCase()}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-base text-neutral-900 truncate">
-                        {item.name}
-                      </h3>
-                      <p className="text-xs font-semibold text-brand-maroon truncate">
-                        {item.subject}
-                      </p>
-                      {item.qualification && (
-                        <p className="text-[11px] text-neutral-500 font-medium truncate mt-0.5">
-                          🎓 {item.qualification}
-                        </p>
-                      )}
-                      {item.experience && (
-                        <p className="text-[11px] text-neutral-500 font-medium truncate">
-                          ⏳ {item.experience}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Bio */}
-                  {item.bio && (
-                    <p className="text-xs text-neutral-600 line-clamp-3 leading-relaxed bg-neutral-50 p-2.5 rounded-xl mb-4 border border-neutral-100">
-                      {item.bio}
-                    </p>
-                  )}
-                </div>
-
-                {/* Bottom Actions */}
-                <div className="flex items-center justify-between pt-3 border-t border-neutral-100 mt-2">
-                  <span className="text-[10px] font-bold text-neutral-400">
-                    Order: #{item.sort_order}
-                  </span>
-
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => open(item)}
-                      className="p-1.5 text-neutral-600 hover:text-brand-maroon hover:bg-neutral-100 rounded-lg transition-colors cursor-pointer"
-                      title="Edit details"
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      onClick={() => del(item.id)}
-                      className="p-1.5 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                      title="Delete member"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                </div>
-
-              </div>
-            )
-          })}
-        </div>
-
-        {filtered.length === 0 && (
+        {loading ? (
+          <AdminGridSkeleton cards={6} />
+        ) : filtered.length === 0 ? (
           <div className="bg-white border border-neutral-200 rounded-2xl p-12 text-center text-neutral-500">
             <Users className="h-10 w-10 text-neutral-300 mx-auto mb-3" />
             <p className="text-sm font-semibold">No members found in this tab.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {filtered.map((item) => {
+              const isFounder = item.is_founder || item.role?.toLowerCase().includes('founder') || item.role === 'Director'
+              const isOffline = Boolean(item.featured_offline)
+
+              return (
+                <div
+                  key={item.id}
+                  className="bg-white border-2 border-neutral-100 hover:border-brand-maroon/40 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
+                >
+                  <div>
+                    {/* Top Tags */}
+                    <div className="flex items-center justify-between gap-2 mb-3">
+                      <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-md ${
+                        isFounder ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-neutral-100 text-neutral-700 border border-neutral-200'
+                      }`}>
+                        {isFounder ? 'Founder / Leadership' : (item.role || 'Faculty')}
+                      </span>
+
+                      {/* Offline Page Feature Toggle */}
+                      <button
+                        onClick={() => toggleFeaturedOffline(item.id, isOffline)}
+                        className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-all flex items-center gap-1 cursor-pointer ${
+                          isOffline
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
+                            : 'bg-neutral-50 text-neutral-400 border-neutral-200 hover:bg-neutral-100 hover:text-neutral-700'
+                        }`}
+                        title="Click to toggle whether this teacher appears on the Offline Jaipur Campus page"
+                      >
+                        {isOffline ? <Check className="h-3 w-3 text-emerald-600" /> : <X className="h-3 w-3 text-neutral-400" />}
+                        <span>{isOffline ? 'On Offline Page' : 'Offline Hidden'}</span>
+                      </button>
+                    </div>
+
+                    {/* Profile Info */}
+                    <div className="flex items-start gap-4 mb-3">
+                      <div className="w-16 h-16 rounded-full overflow-hidden shrink-0 border-2 border-brand-maroon/20 bg-neutral-50 shadow-2xs">
+                        {item.photo_url ? (
+                          <img
+                            src={normalizeImageUrl(item.photo_url)}
+                            alt={item.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center font-bold text-brand-maroon bg-brand-blush">
+                            {item.name.slice(0, 2).toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-base text-neutral-900 truncate">
+                          {item.name}
+                        </h3>
+                        <p className="text-xs font-semibold text-brand-maroon truncate">
+                          {item.subject}
+                        </p>
+                        {item.qualification && (
+                          <p className="text-[11px] text-neutral-500 font-medium truncate mt-0.5">
+                            🎓 {item.qualification}
+                          </p>
+                        )}
+                        {item.experience && (
+                          <p className="text-[11px] text-neutral-500 font-medium truncate">
+                            ⏳ {item.experience}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Bio */}
+                    {item.bio && (
+                      <p className="text-xs text-neutral-600 line-clamp-3 mb-4 leading-relaxed bg-neutral-50 p-2.5 rounded-xl border border-neutral-100">
+                        {item.bio}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Actions Bar */}
+                  <div className="flex items-center justify-between pt-3 border-t border-neutral-100 mt-2">
+                    <span className="text-[10px] text-neutral-400 font-medium">
+                      Order: #{item.sort_order ?? 0}
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => open(item)}
+                        className="p-1.5 text-neutral-500 hover:text-brand-maroon hover:bg-neutral-100 rounded-lg transition-colors cursor-pointer"
+                        title="Edit member details"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => del(item.id)}
+                        className="p-1.5 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                        title="Delete member"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+              )
+            })}
           </div>
         )}
 

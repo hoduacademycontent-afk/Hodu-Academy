@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import AdminLayout from '@/components/admin/AdminLayout'
 import Modal from '@/components/admin/Modal'
+import { AdminTableSkeleton } from '@/components/admin/AdminSkeletons'
 import {
   Phone,
   MessageCircle,
@@ -415,15 +416,12 @@ export default function FacultyApplicationsPage() {
           </div>
         </div>
 
-        {/* Applications Data Table */}
-        <div className="bg-white rounded-2xl border border-neutral-200 shadow-xs overflow-hidden">
-          {loading ? (
-            <div className="py-20 text-center text-neutral-500">
-              <div className="inline-block animate-spin w-8 h-8 border-4 border-brand-maroon border-t-transparent rounded-full mb-3" />
-              <p className="text-xs font-semibold">Loading applications…</p>
-            </div>
-          ) : filteredApps.length === 0 ? (
-            <div className="py-20 text-center px-4">
+        {loading ? (
+          <AdminTableSkeleton rows={6} columns={7} />
+        ) : (
+          <div className="bg-white rounded-2xl border border-neutral-200 shadow-xs overflow-hidden">
+            {filteredApps.length === 0 ? (
+              <div className="py-20 text-center px-4">
               <GraduationCap className="h-12 w-12 text-neutral-300 mx-auto mb-3" />
               <h3 className="text-base font-bold text-neutral-700">No faculty applications found</h3>
               <p className="text-xs text-neutral-500 mt-1 max-w-sm mx-auto">
@@ -614,6 +612,7 @@ export default function FacultyApplicationsPage() {
             </div>
           )}
         </div>
+      )}
 
         {/* Application Details Modal */}
         {detailApp && (() => {

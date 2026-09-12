@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { HODU_SITE_ID } from '@/lib/hodu'
+import { AdminTableSkeleton } from '@/components/admin/AdminSkeletons'
 
 function slugify(text: string) {
   return text
@@ -276,144 +277,148 @@ export default function AdminPagesManager() {
       </div>
 
       {/* Pages Table */}
-      <div className="bg-white border border-[#F3DCDC] rounded-2xl overflow-hidden shadow-2xs">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-[#F3DCDC] bg-[#FDF5F5]">
-                <th className="px-4 py-3 text-left text-[11px] font-semibold text-[#8B7C7C] uppercase tracking-wider">
-                  Page Title &amp; URLs
-                </th>
-                <th className="px-4 py-3 text-left text-[11px] font-semibold text-[#8B7C7C] uppercase tracking-wider">
-                  Category
-                </th>
-                <th className="px-4 py-3 text-left text-[11px] font-semibold text-[#8B7C7C] uppercase tracking-wider">
-                  Legacy / Secondary Link
-                </th>
-                <th className="px-4 py-3 text-left text-[11px] font-semibold text-[#8B7C7C] uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-4 py-3 text-left text-[11px] font-semibold text-[#8B7C7C] uppercase tracking-wider">
-                  View Links
-                </th>
-                <th className="px-4 py-3 text-right text-[11px] font-semibold text-[#8B7C7C] uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredPages.map((p) => (
-                <tr
-                  key={p.id}
-                  className="border-b border-[#F3DCDC] last:border-0 hover:bg-[#FDF5F5]/60 transition-colors"
-                >
-                  <td className="px-4 py-3 max-w-sm">
-                    <p className="font-semibold text-[#1B2A44] text-xs sm:text-sm line-clamp-1">{p.title}</p>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className="text-[11px] text-neutral-400 font-mono truncate max-w-[200px]">/p/{p.slug}</span>
-                      <button
-                        onClick={() => copyText(`/p/${p.slug}`, `slug-${p.id}`)}
-                        className="text-neutral-400 hover:text-neutral-600"
-                        title="Copy modern clean link"
-                      >
-                        {copiedId === `slug-${p.id}` ? <Check size={11} className="text-green-600" /> : <Copy size={11} />}
-                      </button>
-                    </div>
-                  </td>
-
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <span className="bg-[#FDF5F5] text-[#7E0D0D] border border-[#F3DCDC] text-[10px] px-2 py-0.5 rounded-md font-semibold">
-                      {p.category || 'General'}
-                    </span>
-                  </td>
-
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    {p.secondary_link ? (
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[11px] font-mono bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded">
-                          {p.secondary_link}
-                        </span>
+      {loading ? (
+        <AdminTableSkeleton rows={8} columns={6} />
+      ) : (
+        <div className="bg-white border border-[#F3DCDC] rounded-2xl overflow-hidden shadow-2xs">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[#F3DCDC] bg-[#FDF5F5]">
+                  <th className="px-4 py-3 text-left text-[11px] font-semibold text-[#8B7C7C] uppercase tracking-wider">
+                    Page Title &amp; URLs
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-semibold text-[#8B7C7C] uppercase tracking-wider">
+                    Category
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-semibold text-[#8B7C7C] uppercase tracking-wider">
+                    Legacy / Secondary Link
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-semibold text-[#8B7C7C] uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-4 py-3 text-left text-[11px] font-semibold text-[#8B7C7C] uppercase tracking-wider">
+                    View Links
+                  </th>
+                  <th className="px-4 py-3 text-right text-[11px] font-semibold text-[#8B7C7C] uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredPages.map((p) => (
+                  <tr
+                    key={p.id}
+                    className="border-b border-[#F3DCDC] last:border-0 hover:bg-[#FDF5F5]/60 transition-colors"
+                  >
+                    <td className="px-4 py-3 max-w-sm">
+                      <p className="font-semibold text-[#1B2A44] text-xs sm:text-sm line-clamp-1">{p.title}</p>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="text-[11px] text-neutral-400 font-mono truncate max-w-[200px]">/p/{p.slug}</span>
                         <button
-                          onClick={() => copyText(p.secondary_link, `sec-${p.id}`)}
+                          onClick={() => copyText(`/p/${p.slug}`, `slug-${p.id}`)}
                           className="text-neutral-400 hover:text-neutral-600"
-                          title="Copy legacy link"
+                          title="Copy modern clean link"
                         >
-                          {copiedId === `sec-${p.id}` ? <Check size={11} className="text-green-600" /> : <Copy size={11} />}
+                          {copiedId === `slug-${p.id}` ? <Check size={11} className="text-green-600" /> : <Copy size={11} />}
                         </button>
                       </div>
-                    ) : (
-                      <span className="text-neutral-400 text-xs italic">None</span>
-                    )}
-                  </td>
+                    </td>
 
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <button
-                      onClick={() => togglePublish(p)}
-                      className={`flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-medium ${
-                        p.published ? 'bg-green-50 text-green-700' : 'bg-neutral-100 text-neutral-500'
-                      }`}
-                    >
-                      {p.published ? <Eye size={11} /> : <EyeOff size={11} />}
-                      {p.published ? 'Published' : 'Draft'}
-                    </button>
-                  </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <span className="bg-[#FDF5F5] text-[#7E0D0D] border border-[#F3DCDC] text-[10px] px-2 py-0.5 rounded-md font-semibold">
+                        {p.category || 'General'}
+                      </span>
+                    </td>
 
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="flex flex-col gap-1">
-                      {p.secondary_link && (
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      {p.secondary_link ? (
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[11px] font-mono bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded">
+                            {p.secondary_link}
+                          </span>
+                          <button
+                            onClick={() => copyText(p.secondary_link, `sec-${p.id}`)}
+                            className="text-neutral-400 hover:text-neutral-600"
+                            title="Copy legacy link"
+                          >
+                            {copiedId === `sec-${p.id}` ? <Check size={11} className="text-green-600" /> : <Copy size={11} />}
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-neutral-400 text-xs italic">None</span>
+                      )}
+                    </td>
+
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <button
+                        onClick={() => togglePublish(p)}
+                        className={`flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-medium ${
+                          p.published ? 'bg-green-50 text-green-700' : 'bg-neutral-100 text-neutral-500'
+                        }`}
+                      >
+                        {p.published ? <Eye size={11} /> : <EyeOff size={11} />}
+                        {p.published ? 'Published' : 'Draft'}
+                      </button>
+                    </td>
+
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="flex flex-col gap-1">
+                        {p.secondary_link && (
+                          <a
+                            href={p.secondary_link}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-[#7E0D0D] hover:underline text-xs flex items-center gap-1 font-semibold"
+                          >
+                            <ExternalLink size={11} /> Legacy View
+                          </a>
+                        )}
                         <a
-                          href={p.secondary_link}
+                          href={`/p/${p.slug}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-[#7E0D0D] hover:underline text-xs flex items-center gap-1 font-semibold"
+                          className="text-neutral-600 hover:underline text-xs flex items-center gap-1"
                         >
-                          <ExternalLink size={11} /> Legacy View
+                          <ExternalLink size={11} /> Clean View
                         </a>
-                      )}
-                      <a
-                        href={`/p/${p.slug}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-neutral-600 hover:underline text-xs flex items-center gap-1"
-                      >
-                        <ExternalLink size={11} /> Clean View
-                      </a>
-                    </div>
-                  </td>
+                      </div>
+                    </td>
 
-                  <td className="px-4 py-3 text-right whitespace-nowrap">
-                    <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => openModal(p)}
-                        className="text-xs px-2.5 py-1 border border-[#F3DCDC] rounded-lg text-[#1B2A44] hover:bg-[#FDF5F5] flex items-center gap-1 font-medium"
-                      >
-                        <Pencil size={11} /> Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(p.id)}
-                        className="text-xs px-2.5 py-1 border border-red-200 rounded-lg text-red-600 hover:bg-red-50 flex items-center gap-1 font-medium"
-                      >
-                        <Trash2 size={11} /> Del
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {!loading && filteredPages.length === 0 && (
-          <div className="text-center py-12 text-sm text-neutral-400">
-            No pages found matching &quot;{search}&quot;.
+                    <td className="px-4 py-3 text-right whitespace-nowrap">
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => openModal(p)}
+                          className="text-xs px-2.5 py-1 border border-[#F3DCDC] rounded-lg text-[#1B2A44] hover:bg-[#FDF5F5] flex items-center gap-1 font-medium"
+                        >
+                          <Pencil size={11} /> Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(p.id)}
+                          className="text-xs px-2.5 py-1 border border-red-200 rounded-lg text-red-600 hover:bg-red-50 flex items-center gap-1 font-medium"
+                        >
+                          <Trash2 size={11} /> Del
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
 
-        <div className="p-3 bg-[#FAF7F7] border-t border-[#F3DCDC] text-xs text-neutral-500 flex justify-between items-center">
-          <span>Showing <strong>{filteredPages.length}</strong> of <strong>{pages.length}</strong> pages</span>
-          <span>Hodu CMS v2.0</span>
+          {!loading && filteredPages.length === 0 && (
+            <div className="text-center py-12 text-sm text-neutral-400">
+              No pages found matching &quot;{search}&quot;.
+            </div>
+          )}
+
+          <div className="p-3 bg-[#FAF7F7] border-t border-[#F3DCDC] text-xs text-neutral-500 flex justify-between items-center">
+            <span>Showing <strong>{filteredPages.length}</strong> of <strong>{pages.length}</strong> pages</span>
+            <span>Hodu CMS v2.0</span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Add / Edit Modal */}
       {modalOpen && (

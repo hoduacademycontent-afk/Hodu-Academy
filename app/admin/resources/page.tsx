@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import AdminLayout from '@/components/admin/AdminLayout'
 import Modal from '@/components/admin/Modal'
 import { Plus, Pencil, Trash2, FileText, ExternalLink, Upload, Loader, X } from 'lucide-react'
+import { AdminTableSkeleton } from '@/components/admin/AdminSkeletons'
 
 const SITE_ID = 'a1b2c3d4-1111-1111-1111-000000000002'
 const EMPTY = { title: '', slug: '', type: 'Blog', category: '', file_url: '', content: '' }
@@ -14,6 +15,7 @@ const DEFAULT_CATEGORIES = ['NEET', 'JEE Main', 'JEE Advanced', 'CBSE', 'NCERT',
 export default function ResourcesPage() {
   const supabase = createClient()
   const [items, setItems]       = useState<any[]>([])
+  const [loading, setLoading]   = useState(true)
   const [modal, setModal]       = useState<'add' | 'edit' | null>(null)
   const [form, setForm]         = useState<any>(EMPTY)
   const [saving, setSaving]     = useState(false)
@@ -24,8 +26,13 @@ export default function ResourcesPage() {
   const fileRef = useRef<HTMLInputElement>(null)
 
   async function load() {
-    const { data } = await supabase.from('cms_resources').select('*').eq('site_id', SITE_ID).order('created_at', { ascending: false })
-    setItems(data ?? [])
+    setLoading(true)
+    try {
+      const { data } = await supabase.from('cms_resources').select('*').eq('site_id', SITE_ID).order('created_at', { ascending: false })
+      setItems(data ?? [])
+    } finally {
+      setLoading(false)
+    }
   }
 
   async function loadCategories() {
@@ -118,36 +125,40 @@ export default function ResourcesPage() {
         ))}
       </div>
 
-      <div className="bg-white border border-[#F3DCDC] rounded-2xl overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-[#F3DCDC] bg-[#FDF5F5]">
-              {['Title', 'Type', 'Category', 'Link', 'Actions'].map((h) => (
-                <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-[#C9C8CB] uppercase">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((r) => (
-              <tr key={r.id} className="border-b border-[#F3DCDC] last:border-0 hover:bg-[#FDF5F5]">
-                <td className="px-4 py-3 font-medium text-[#1B2A44] flex items-center gap-2"><FileText size={14} className="text-[#7E0D0D]" />{r.title}</td>
-                <td className="px-4 py-3"><span className="bg-[#FDF5F5] text-[#7E0D0D] text-xs px-2 py-0.5 rounded-full font-medium">{r.type}</span></td>
-                <td className="px-4 py-3 text-[#C9C8CB] text-xs">{r.category || '—'}</td>
-                <td className="px-4 py-3">
-                  {r.file_url && <a href={r.file_url} target="_blank" rel="noreferrer" className="text-[#7E0D0D] hover:underline text-xs flex items-center gap-1"><ExternalLink size={11} />Open</a>}
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex gap-2">
-                    <button onClick={() => open(r)} className="text-xs px-3 py-1 border border-[#F3DCDC] rounded-lg text-[#1B2A44] hover:bg-[#FDF5F5] flex items-center gap-1"><Pencil size={11} />Edit</button>
-                    <button onClick={() => del(r.id)} className="text-xs px-3 py-1 border border-red-100 rounded-lg text-red-500 hover:bg-red-50 flex items-center gap-1"><Trash2 size={11} />Del</button>
-                  </div>
-                </td>
+      {loading ? (
+        <AdminTableSkeleton rows={6} columns={5} />
+      ) : (
+        <div className="bg-white border border-[#F3DCDC] rounded-2xl overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-[#F3DCDC] bg-[#FDF5F5]">
+                {['Title', 'Type', 'Category', 'Link', 'Actions'].map((h) => (
+                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-[#C9C8CB] uppercase">{h}</th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-        {filtered.length === 0 && <p className="text-center text-[#C9C8CB] py-12 text-sm">No resources yet.</p>}
-      </div>
+            </thead>
+            <tbody>
+              {filtered.map((r) => (
+                <tr key={r.id} className="border-b border-[#F3DCDC] last:border-0 hover:bg-[#FDF5F5]">
+                  <td className="px-4 py-3 font-medium text-[#1B2A44] flex items-center gap-2"><FileText size={14} className="text-[#7E0D0D]" />{r.title}</td>
+                  <td className="px-4 py-3"><span className="bg-[#FDF5F5] text-[#7E0D0D] text-xs px-2 py-0.5 rounded-full font-medium">{r.type}</span></td>
+                  <td className="px-4 py-3 text-[#C9C8CB] text-xs">{r.category || '—'}</td>
+                  <td className="px-4 py-3">
+                    {r.file_url && <a href={r.file_url} target="_blank" rel="noreferrer" className="text-[#7E0D0D] hover:underline text-xs flex items-center gap-1"><ExternalLink size={11} />Open</a>}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-2">
+                      <button onClick={() => open(r)} className="text-xs px-3 py-1 border border-[#F3DCDC] rounded-lg text-[#1B2A44] hover:bg-[#FDF5F5] flex items-center gap-1"><Pencil size={11} />Edit</button>
+                      <button onClick={() => del(r.id)} className="text-xs px-3 py-1 border border-red-100 rounded-lg text-red-500 hover:bg-red-50 flex items-center gap-1"><Trash2 size={11} />Del</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {filtered.length === 0 && <p className="text-center text-[#C9C8CB] py-12 text-sm">No resources yet.</p>}
+        </div>
+      )}
 
       {modal && (
         <Modal title={modal === 'edit' ? 'Edit Resource' : 'Add Resource'} onClose={() => setModal(null)}>

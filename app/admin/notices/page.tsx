@@ -1,10 +1,11 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import AdminLayout from '@/components/admin/AdminLayout'
 import Modal from '@/components/admin/Modal'
 import { Plus, Pencil, Trash2, CheckCircle, XCircle } from 'lucide-react'
+import { AdminTableSkeleton } from '@/components/admin/AdminSkeletons'
 
 const SITE_ID = 'a1b2c3d4-1111-1111-1111-000000000002'
 const EMPTY = { title: '', description: '', publish_date: new Date().toISOString().slice(0, 10), is_active: true }
@@ -12,13 +13,19 @@ const EMPTY = { title: '', description: '', publish_date: new Date().toISOString
 export default function NoticesPage() {
   const supabase = createClient()
   const [notices, setNotices] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const [modal, setModal]     = useState<'add' | 'edit' | null>(null)
   const [form, setForm]       = useState<any>(EMPTY)
   const [saving, setSaving]   = useState(false)
 
   async function load() {
-    const { data } = await supabase.from('cms_notices').select('*').eq('site_id', SITE_ID).order('publish_date', { ascending: false })
-    setNotices(data ?? [])
+    setLoading(true)
+    try {
+      const { data } = await supabase.from('cms_notices').select('*').eq('site_id', SITE_ID).order('publish_date', { ascending: false })
+      setNotices(data ?? [])
+    } finally {
+      setLoading(false)
+    }
   }
   useEffect(() => { load() }, [])
 
@@ -54,30 +61,34 @@ export default function NoticesPage() {
         </button>
       </div>
 
-      <div className="space-y-3">
-        {notices.map((n) => (
-          <div key={n.id} className={`bg-white border rounded-2xl p-5 flex items-start justify-between gap-4 ${n.is_active ? 'border-[#F3DCDC]' : 'border-gray-200 opacity-60'}`}>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="font-semibold text-[#1B2A44] text-sm">{n.title}</h3>
-                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${n.is_active ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                  {n.is_active ? 'Active' : 'Hidden'}
-                </span>
+      {loading ? (
+        <AdminTableSkeleton rows={5} columns={4} />
+      ) : (
+        <div className="space-y-3">
+          {notices.map((n) => (
+            <div key={n.id} className={`bg-white border rounded-2xl p-5 flex items-start justify-between gap-4 ${n.is_active ? 'border-[#F3DCDC]' : 'border-gray-200 opacity-60'}`}>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="font-semibold text-[#1B2A44] text-sm">{n.title}</h3>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${n.is_active ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                    {n.is_active ? 'Active' : 'Hidden'}
+                  </span>
+                </div>
+                {n.description && <p className="text-xs text-[#1B2A44] opacity-70">{n.description}</p>}
+                <p className="text-xs text-[#C9C8CB] mt-1">{new Date(n.publish_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
               </div>
-              {n.description && <p className="text-xs text-[#1B2A44] opacity-70">{n.description}</p>}
-              <p className="text-xs text-[#C9C8CB] mt-1">{new Date(n.publish_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+              <div className="flex gap-2 shrink-0">
+                <button onClick={() => toggleActive(n)} title={n.is_active ? 'Hide' : 'Show'} className="p-2 rounded-lg border border-[#F3DCDC] hover:bg-[#FDF5F5]">
+                  {n.is_active ? <XCircle size={14} className="text-gray-400" /> : <CheckCircle size={14} className="text-green-500" />}
+                </button>
+                <button onClick={() => open(n)} className="p-2 rounded-lg border border-[#F3DCDC] hover:bg-[#FDF5F5]"><Pencil size={14} className="text-[#1B2A44]" /></button>
+                <button onClick={() => del(n.id)} className="p-2 rounded-lg border border-red-100 hover:bg-red-50"><Trash2 size={14} className="text-red-500" /></button>
+              </div>
             </div>
-            <div className="flex gap-2 shrink-0">
-              <button onClick={() => toggleActive(n)} title={n.is_active ? 'Hide' : 'Show'} className="p-2 rounded-lg border border-[#F3DCDC] hover:bg-[#FDF5F5]">
-                {n.is_active ? <XCircle size={14} className="text-gray-400" /> : <CheckCircle size={14} className="text-green-500" />}
-              </button>
-              <button onClick={() => open(n)} className="p-2 rounded-lg border border-[#F3DCDC] hover:bg-[#FDF5F5]"><Pencil size={14} className="text-[#1B2A44]" /></button>
-              <button onClick={() => del(n.id)} className="p-2 rounded-lg border border-red-100 hover:bg-red-50"><Trash2 size={14} className="text-red-500" /></button>
-            </div>
-          </div>
-        ))}
-        {notices.length === 0 && <p className="text-center text-[#C9C8CB] py-12 text-sm">No notices yet.</p>}
-      </div>
+          ))}
+          {notices.length === 0 && <p className="text-center text-[#C9C8CB] py-12 text-sm">No notices yet.</p>}
+        </div>
+      )}
 
       {modal && (
         <Modal title={modal === 'edit' ? 'Edit Notice' : 'Add Notice'} onClose={() => setModal(null)}>

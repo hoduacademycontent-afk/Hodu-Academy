@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -6,6 +6,7 @@ import AdminLayout from '@/components/admin/AdminLayout'
 import Modal from '@/components/admin/Modal'
 import ImageUpload from '@/components/admin/ImageUpload'
 import { Plus, Pencil, Trash2, Star } from 'lucide-react'
+import { AdminGridSkeleton } from '@/components/admin/AdminSkeletons'
 
 const SITE_ID = 'a1b2c3d4-1111-1111-1111-000000000002'
 const EMPTY = {
@@ -17,6 +18,7 @@ const EMPTY = {
 export default function CoursesPage() {
   const supabase = createClient()
   const [courses, setCourses]   = useState<any[]>([])
+  const [loading, setLoading]   = useState(true)
   const [modal, setModal]       = useState<'add' | 'edit' | null>(null)
   const [form, setForm]         = useState<any>(EMPTY)
   const [saving, setSaving]     = useState(false)
@@ -24,8 +26,13 @@ export default function CoursesPage() {
   const [deleting, setDeleting] = useState<string | null>(null)
 
   async function load() {
-    const { data } = await supabase.from('cms_courses').select('*').eq('site_id', SITE_ID).order('sort_order')
-    setCourses(data ?? [])
+    setLoading(true)
+    try {
+      const { data } = await supabase.from('cms_courses').select('*').eq('site_id', SITE_ID).order('sort_order')
+      setCourses(data ?? [])
+    } finally {
+      setLoading(false)
+    }
   }
   useEffect(() => { load() }, [])
 
@@ -90,32 +97,40 @@ export default function CoursesPage() {
         </button>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {courses.map((c) => (
-          <div key={c.id} className="bg-white border border-[#F3DCDC] rounded-2xl overflow-hidden">
-            {c.image_url ? (
-              <img src={c.image_url} alt={c.title} className="w-full h-36 object-cover" />
-            ) : (
-              <div className="w-full h-36 bg-[#FDF5F5] flex items-center justify-center text-[#C9C8CB] text-xs">No image</div>
-            )}
-            <div className="p-4">
-              <div className="flex items-start justify-between gap-2 mb-1">
-                <h3 className="font-semibold text-[#1B2A44] text-sm leading-snug">{c.title}</h3>
-                {c.is_featured && <Star size={14} className="text-[#7E0D0D] shrink-0 mt-0.5" fill="currentColor" />}
-              </div>
-              <p className="text-xs text-[#C9C8CB] mb-3">{c.category} · {c.mode} · {c.class_level}</p>
-              <div className="flex gap-2">
-                <button onClick={() => open(c)} className="flex-1 text-xs border border-[#F3DCDC] text-[#1B2A44] hover:bg-[#FDF5F5] py-1.5 rounded-lg flex items-center justify-center gap-1">
-                  <Pencil size={12} /> Edit
-                </button>
-                <button onClick={() => del(c.id)} disabled={deleting === c.id} className="flex-1 text-xs border border-red-100 text-red-500 hover:bg-red-50 py-1.5 rounded-lg flex items-center justify-center gap-1">
-                  <Trash2 size={12} /> {deleting === c.id ? '…' : 'Delete'}
-                </button>
+      {loading ? (
+        <AdminGridSkeleton cards={6} />
+      ) : courses.length === 0 ? (
+        <div className="bg-white border border-[#F3DCDC] rounded-2xl p-12 text-center">
+          <p className="text-[#64748b] text-sm">No courses found. Click &quot;Add Course&quot; to create one.</p>
+        </div>
+      ) : (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {courses.map((c) => (
+            <div key={c.id} className="bg-white border border-[#F3DCDC] rounded-2xl overflow-hidden">
+              {c.image_url ? (
+                <img src={c.image_url} alt={c.title} className="w-full h-36 object-cover" />
+              ) : (
+                <div className="w-full h-36 bg-[#FDF5F5] flex items-center justify-center text-[#C9C8CB] text-xs">No image</div>
+              )}
+              <div className="p-4">
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <h3 className="font-semibold text-[#1B2A44] text-sm leading-snug">{c.title}</h3>
+                  {c.is_featured && <Star size={14} className="text-[#7E0D0D] shrink-0 mt-0.5" fill="currentColor" />}
+                </div>
+                <p className="text-xs text-[#C9C8CB] mb-3">{c.category} · {c.mode} · {c.class_level}</p>
+                <div className="flex gap-2">
+                  <button onClick={() => open(c)} className="flex-1 text-xs border border-[#F3DCDC] text-[#1B2A44] hover:bg-[#FDF5F5] py-1.5 rounded-lg flex items-center justify-center gap-1">
+                    <Pencil size={12} /> Edit
+                  </button>
+                  <button onClick={() => del(c.id)} disabled={deleting === c.id} className="flex-1 text-xs border border-red-100 text-red-500 hover:bg-red-50 py-1.5 rounded-lg flex items-center justify-center gap-1">
+                    <Trash2 size={12} /> {deleting === c.id ? '…' : 'Delete'}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {modal && (
         <Modal title={modal === 'edit' ? 'Edit Course' : 'Add Course'} onClose={() => setModal(null)}>

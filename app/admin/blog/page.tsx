@@ -7,6 +7,7 @@ import Modal from '@/components/admin/Modal'
 import ImageUpload from '@/components/admin/ImageUpload'
 import RichTextEditor from '@/components/admin/RichTextEditor'
 import { Plus, Pencil, Trash2, ExternalLink, Eye, EyeOff, Search, RefreshCw } from 'lucide-react'
+import { AdminTableSkeleton } from '@/components/admin/AdminSkeletons'
 
 const SITE_ID = 'a1b2c3d4-1111-1111-1111-000000000002'
 const CATEGORIES = ['All', 'JEE', 'NEET', 'IGCSE', 'IB', 'CBSE', 'Olympiad', 'General']
@@ -34,6 +35,7 @@ function slugify(s: string) {
 export default function BlogAdminPage() {
   const supabase = createClient()
   const [posts, setPosts] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const [modal, setModal] = useState<'add' | 'edit' | null>(null)
   const [form, setForm] = useState<any>(EMPTY)
   const [saving, setSaving] = useState(false)
@@ -42,12 +44,17 @@ export default function BlogAdminPage() {
   const [catFilter, setCatFilter] = useState('All')
 
   async function load() {
-    const { data } = await supabase
-      .from('cms_blogs')
-      .select('*')
-      .eq('site_id', SITE_ID)
-      .order('created_at', { ascending: false })
-    setPosts(data ?? [])
+    setLoading(true)
+    try {
+      const { data } = await supabase
+        .from('cms_blogs')
+        .select('*')
+        .eq('site_id', SITE_ID)
+        .order('created_at', { ascending: false })
+      setPosts(data ?? [])
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -181,113 +188,117 @@ export default function BlogAdminPage() {
       </div>
 
       {/* Blog Table */}
-      <div className="bg-white border border-[#F3DCDC] rounded-2xl overflow-hidden shadow-2xs">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-[#F3DCDC] bg-[#FDF5F5]">
-                {['Cover', 'Title', 'Category', 'Date', 'Status', 'Link', 'Actions'].map((h) => (
-                  <th
-                    key={h}
-                    className="px-4 py-3 text-left text-[11px] font-semibold text-[#8B7C7C] uppercase tracking-wider"
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {displayedPosts.map((p) => (
-                <tr
-                  key={p.id}
-                  className="border-b border-[#F3DCDC] last:border-0 hover:bg-[#FDF5F5]/60 transition-colors"
-                >
-                  <td className="px-4 py-3">
-                    <div className="w-14 h-9 rounded bg-black overflow-hidden border border-neutral-200 shrink-0">
-                      {p.cover_image ? (
-                        <img
-                          src={p.cover_image}
-                          alt=""
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-neutral-200" />
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 font-semibold text-[#1B2A44] max-w-xs sm:max-w-md">
-                    <p className="truncate text-xs sm:text-sm">{p.title}</p>
-                    <div className="flex items-center gap-2 flex-wrap mt-0.5">
-                      <span className="text-[10px] text-neutral-500 font-mono">/blog/{p.slug}</span>
-                      {p.secondary_link && (
-                        <span className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.2 rounded font-mono" title="Legacy redirect URL">
-                          Legacy: {p.secondary_link}
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="bg-[#FDF5F5] text-[#7E0D0D] border border-[#F3DCDC] text-[11px] px-2.5 py-0.5 rounded-full font-semibold">
-                      {p.category}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-xs text-neutral-500 whitespace-nowrap">
-                    {new Date(p.created_at).toLocaleDateString('en-GB', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                    })}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <button
-                      onClick={() => togglePublished(p)}
-                      className={`flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-medium ${
-                        p.published ? 'bg-green-50 text-green-700' : 'bg-neutral-100 text-neutral-500'
-                      }`}
+      {loading ? (
+        <AdminTableSkeleton rows={6} columns={7} />
+      ) : (
+        <div className="bg-white border border-[#F3DCDC] rounded-2xl overflow-hidden shadow-2xs">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[#F3DCDC] bg-[#FDF5F5]">
+                  {['Cover', 'Title', 'Category', 'Date', 'Status', 'Link', 'Actions'].map((h) => (
+                    <th
+                      key={h}
+                      className="px-4 py-3 text-left text-[11px] font-semibold text-[#8B7C7C] uppercase tracking-wider"
                     >
-                      {p.published ? <Eye size={11} /> : <EyeOff size={11} />}
-                      {p.published ? 'Published' : 'Draft'}
-                    </button>
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <a
-                      href={`/blog/${p.slug}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-[#7E0D0D] hover:underline text-xs flex items-center gap-1 font-medium"
-                    >
-                      <ExternalLink size={12} />
-                      <span>View</span>
-                    </a>
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => open(p)}
-                        className="text-xs px-2.5 py-1 border border-[#F3DCDC] rounded-lg text-[#1B2A44] hover:bg-[#FDF5F5] flex items-center gap-1"
-                      >
-                        <Pencil size={11} /> Edit
-                      </button>
-                      <button
-                        onClick={() => del(p.id)}
-                        className="text-xs px-2.5 py-1 border border-red-200 rounded-lg text-red-600 hover:bg-red-50 flex items-center gap-1"
-                      >
-                        <Trash2 size={11} /> Del
-                      </button>
-                    </div>
-                  </td>
+                      {h}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {displayedPosts.length === 0 && (
-          <div className="text-center py-12 text-sm text-neutral-400">
-            No blog posts found.
+              </thead>
+              <tbody>
+                {displayedPosts.map((p) => (
+                  <tr
+                    key={p.id}
+                    className="border-b border-[#F3DCDC] last:border-0 hover:bg-[#FDF5F5]/60 transition-colors"
+                  >
+                    <td className="px-4 py-3">
+                      <div className="w-14 h-9 rounded bg-black overflow-hidden border border-neutral-200 shrink-0">
+                        {p.cover_image ? (
+                          <img
+                            src={p.cover_image}
+                            alt=""
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-neutral-200" />
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 font-semibold text-[#1B2A44] max-w-xs sm:max-w-md">
+                      <p className="truncate text-xs sm:text-sm">{p.title}</p>
+                      <div className="flex items-center gap-2 flex-wrap mt-0.5">
+                        <span className="text-[10px] text-neutral-500 font-mono">/blog/{p.slug}</span>
+                        {p.secondary_link && (
+                          <span className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.2 rounded font-mono" title="Legacy redirect URL">
+                            Legacy: {p.secondary_link}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="bg-[#FDF5F5] text-[#7E0D0D] border border-[#F3DCDC] text-[11px] px-2.5 py-0.5 rounded-full font-semibold">
+                        {p.category}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-neutral-500 whitespace-nowrap">
+                      {new Date(p.created_at).toLocaleDateString('en-GB', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <button
+                        onClick={() => togglePublished(p)}
+                        className={`flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-medium ${
+                          p.published ? 'bg-green-50 text-green-700' : 'bg-neutral-100 text-neutral-500'
+                        }`}
+                      >
+                        {p.published ? <Eye size={11} /> : <EyeOff size={11} />}
+                        {p.published ? 'Published' : 'Draft'}
+                      </button>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <a
+                        href={`/blog/${p.slug}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[#7E0D0D] hover:underline text-xs flex items-center gap-1 font-medium"
+                      >
+                        <ExternalLink size={12} />
+                        <span>View</span>
+                      </a>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => open(p)}
+                          className="text-xs px-2.5 py-1 border border-[#F3DCDC] rounded-lg text-[#1B2A44] hover:bg-[#FDF5F5] flex items-center gap-1"
+                        >
+                          <Pencil size={11} /> Edit
+                        </button>
+                        <button
+                          onClick={() => del(p.id)}
+                          className="text-xs px-2.5 py-1 border border-red-200 rounded-lg text-red-600 hover:bg-red-50 flex items-center gap-1"
+                        >
+                          <Trash2 size={11} /> Del
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
-      </div>
+
+          {displayedPosts.length === 0 && (
+            <div className="text-center py-12 text-sm text-neutral-400">
+              No blog posts found.
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Add / Edit Modal */}
       {modal && (

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -6,6 +6,7 @@ import AdminLayout from '@/components/admin/AdminLayout'
 import Modal from '@/components/admin/Modal'
 import ImageUpload from '@/components/admin/ImageUpload'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { AdminGridSkeleton } from '@/components/admin/AdminSkeletons'
 
 const SITE_ID = 'a1b2c3d4-1111-1111-1111-000000000002'
 const EMPTY = { name: '', role: '', message: '', photo_url: '', rating: 5 }
@@ -13,13 +14,19 @@ const EMPTY = { name: '', role: '', message: '', photo_url: '', rating: 5 }
 export default function TestimonialsPage() {
   const supabase = createClient()
   const [items, setItems]   = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const [modal, setModal]   = useState<'add' | 'edit' | null>(null)
   const [form, setForm]     = useState<any>(EMPTY)
   const [saving, setSaving] = useState(false)
 
   async function load() {
-    const { data } = await supabase.from('cms_testimonials').select('*').eq('site_id', SITE_ID).order('created_at')
-    setItems(data ?? [])
+    setLoading(true)
+    try {
+      const { data } = await supabase.from('cms_testimonials').select('*').eq('site_id', SITE_ID).order('created_at')
+      setItems(data ?? [])
+    } finally {
+      setLoading(false)
+    }
   }
   useEffect(() => { load() }, [])
 
@@ -51,33 +58,41 @@ export default function TestimonialsPage() {
         </button>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {items.map((t) => (
-          <div key={t.id} className="bg-white border border-[#F3DCDC] rounded-2xl p-5">
-            <div className="flex gap-1 mb-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <span key={i} className={`text-sm ${i < t.rating ? 'text-[#7E0D0D]' : 'text-[#F3DCDC]'}`}>★</span>
-              ))}
-            </div>
-            <p className="text-xs text-[#1B2A44] opacity-80 mb-4 line-clamp-3">"{t.message}"</p>
-            <div className="flex items-center gap-3 mb-4">
-              {t.photo_url ? (
-                <img src={t.photo_url} alt={t.name} className="w-9 h-9 rounded-full object-cover" />
-              ) : (
-                <div className="w-9 h-9 bg-[#F3DCDC] rounded-full flex items-center justify-center text-[#7E0D0D] text-xs font-bold">{t.name[0]}</div>
-              )}
-              <div>
-                <p className="font-semibold text-[#1B2A44] text-xs">{t.name}</p>
-                <p className="text-[#C9C8CB] text-xs">{t.role}</p>
+      {loading ? (
+        <AdminGridSkeleton cards={6} />
+      ) : items.length === 0 ? (
+        <div className="bg-white border border-[#F3DCDC] rounded-2xl p-12 text-center text-neutral-400 text-sm">
+          No testimonials added yet.
+        </div>
+      ) : (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {items.map((t) => (
+            <div key={t.id} className="bg-white border border-[#F3DCDC] rounded-2xl p-5">
+              <div className="flex gap-1 mb-3">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <span key={i} className={`text-sm ${i < t.rating ? 'text-[#7E0D0D]' : 'text-[#F3DCDC]'}`}>★</span>
+                ))}
+              </div>
+              <p className="text-xs text-[#1B2A44] opacity-80 mb-4 line-clamp-3">&quot;{t.message}&quot;</p>
+              <div className="flex items-center gap-3 mb-4">
+                {t.photo_url ? (
+                  <img src={t.photo_url} alt={t.name} className="w-9 h-9 rounded-full object-cover" />
+                ) : (
+                  <div className="w-9 h-9 bg-[#F3DCDC] rounded-full flex items-center justify-center text-[#7E0D0D] text-xs font-bold">{t.name[0]}</div>
+                )}
+                <div>
+                  <p className="font-semibold text-[#1B2A44] text-xs">{t.name}</p>
+                  <p className="text-[#C9C8CB] text-xs">{t.role}</p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => open(t)} className="flex-1 text-xs border border-[#F3DCDC] text-[#1B2A44] hover:bg-[#FDF5F5] py-1.5 rounded-lg flex items-center justify-center gap-1"><Pencil size={12} />Edit</button>
+                <button onClick={() => del(t.id)} className="flex-1 text-xs border border-red-100 text-red-500 hover:bg-red-50 py-1.5 rounded-lg flex items-center justify-center gap-1"><Trash2 size={12} />Delete</button>
               </div>
             </div>
-            <div className="flex gap-2">
-              <button onClick={() => open(t)} className="flex-1 text-xs border border-[#F3DCDC] text-[#1B2A44] hover:bg-[#FDF5F5] py-1.5 rounded-lg flex items-center justify-center gap-1"><Pencil size={12} />Edit</button>
-              <button onClick={() => del(t.id)} className="flex-1 text-xs border border-red-100 text-red-500 hover:bg-red-50 py-1.5 rounded-lg flex items-center justify-center gap-1"><Trash2 size={12} />Delete</button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {modal && (
         <Modal title={modal === 'edit' ? 'Edit Testimonial' : 'Add Testimonial'} onClose={() => setModal(null)}>

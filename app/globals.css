@@ -83,6 +83,27 @@
   50% { transform: translate3d(0, -6px, 0); }
 }
 
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, rgba(229, 231, 235, 0.6) 0%, rgba(243, 244, 246, 0.9) 50%, rgba(229, 231, 235, 0.6) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
+.animate-shimmer-brand {
+  background: linear-gradient(90deg, rgba(248, 238, 238, 0.7) 0%, rgba(255, 255, 255, 0.95) 50%, rgba(248, 238, 238, 0.7) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
 .animate-float {
   animation: float-subtle 4.5s ease-in-out infinite;
 }

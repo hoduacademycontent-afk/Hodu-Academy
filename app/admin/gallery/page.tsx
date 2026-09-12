@@ -6,6 +6,7 @@ import AdminLayout from '@/components/admin/AdminLayout'
 import Modal from '@/components/admin/Modal'
 import ImageUpload from '@/components/admin/ImageUpload'
 import { Plus, Trash2, Pencil } from 'lucide-react'
+import { AdminGridSkeleton } from '@/components/admin/AdminSkeletons'
 
 const SITE_ID = 'a1b2c3d4-1111-1111-1111-000000000002'
 const EMPTY = { image_url: '', caption: '', category: 'Life at Hodu Academy', sort_order: 0 }
@@ -39,6 +40,7 @@ const WEIGHT_OPTS = [
 export default function GalleryPage() {
   const supabase = createClient()
   const [images, setImages] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('All')
   const [modal, setModal]   = useState<'add' | 'edit' | null>(null)
   const [form, setForm]     = useState<any>(EMPTY)
@@ -53,8 +55,13 @@ export default function GalleryPage() {
   })
 
   async function load() {
-    const { data } = await supabase.from('cms_gallery').select('*').eq('site_id', SITE_ID).order('sort_order')
-    setImages(data ?? [])
+    setLoading(true)
+    try {
+      const { data } = await supabase.from('cms_gallery').select('*').eq('site_id', SITE_ID).order('sort_order')
+      setImages(data ?? [])
+    } finally {
+      setLoading(false)
+    }
   }
   useEffect(() => { load() }, [])
 
@@ -128,42 +135,45 @@ export default function GalleryPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-        {filteredImages.map((img) => (
-          <div key={img.id} className="relative group bg-white border border-[#F3DCDC] rounded-2xl overflow-hidden shadow-xs">
-            <img src={img.image_url} alt={img.caption ?? ''} className="w-full h-40 object-cover" />
-            <div className="p-3">
-              <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full mb-1 inline-block ${
-                img.category === 'Life at Hodu Academy'
-                  ? 'bg-rose-100 text-rose-900 border border-rose-300'
-                  : img.category === 'PTM Gallery'
-                  ? 'bg-amber-100 text-amber-900 border border-amber-300'
-                  : CAROUSEL_CATS.includes(img.category)
-                  ? 'bg-brand-maroon/10 text-brand-maroon'
-                  : 'bg-[#FDF5F5] text-neutral-600'
-              }`}>{img.category}</span>
-              <p className="text-xs font-medium text-[#1B2A44] truncate">
-                {CAROUSEL_CATS.includes(img.category)
-                  ? (() => { try { return JSON.parse(img.caption)?.heading || 'Carousel Slide' } catch { return img.caption || 'Carousel Slide' } })()
-                  : (img.caption || 'No caption')}
-              </p>
-            </div>
-            <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button onClick={() => open(img)} className="bg-white/90 backdrop-blur p-1.5 rounded-lg shadow cursor-pointer"><Pencil size={13} className="text-[#1B2A44]" /></button>
-              <button onClick={() => del(img.id)} className="bg-white/90 backdrop-blur p-1.5 rounded-lg shadow cursor-pointer"><Trash2 size={13} className="text-red-500" /></button>
-            </div>
-          </div>
-        ))}
-      </div>
-      {filteredImages.length === 0 && (
+      {loading ? (
+        <AdminGridSkeleton cards={8} />
+      ) : filteredImages.length === 0 ? (
         <div className="text-center bg-white border border-[#F3DCDC] rounded-2xl py-12 px-4 space-y-2">
           <p className="text-sm font-semibold text-[#1B2A44]">No images found in {activeTab}.</p>
           <p className="text-xs text-neutral-400 max-w-xs mx-auto">
-            Click "Add Image" to upload a new image under {activeTab === 'All' ? 'any category' : activeTab}.
+            Click &quot;Add Image&quot; to upload a new image under {activeTab === 'All' ? 'any category' : activeTab}.
           </p>
           <button onClick={() => open()} className="mt-2 text-xs font-bold text-brand-maroon bg-[#FDF5F5] px-3.5 py-1.5 rounded-lg hover:bg-brand-maroon hover:text-white transition-colors cursor-pointer">
             + Upload Now
           </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {filteredImages.map((img) => (
+            <div key={img.id} className="relative group bg-white border border-[#F3DCDC] rounded-2xl overflow-hidden shadow-xs">
+              <img src={img.image_url} alt={img.caption ?? ''} className="w-full h-40 object-cover" />
+              <div className="p-3">
+                <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full mb-1 inline-block ${
+                  img.category === 'Life at Hodu Academy'
+                    ? 'bg-rose-100 text-rose-900 border border-rose-300'
+                    : img.category === 'PTM Gallery'
+                    ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                    : CAROUSEL_CATS.includes(img.category)
+                    ? 'bg-brand-maroon/10 text-brand-maroon'
+                    : 'bg-[#FDF5F5] text-neutral-600'
+                }`}>{img.category}</span>
+                <p className="text-xs font-medium text-[#1B2A44] truncate">
+                  {CAROUSEL_CATS.includes(img.category)
+                    ? (() => { try { return JSON.parse(img.caption)?.heading || 'Carousel Slide' } catch { return img.caption || 'Carousel Slide' } })()
+                    : (img.caption || 'No caption')}
+                </p>
+              </div>
+              <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onClick={() => open(img)} className="bg-white/90 backdrop-blur p-1.5 rounded-lg shadow cursor-pointer"><Pencil size={13} className="text-[#1B2A44]" /></button>
+                <button onClick={() => del(img.id)} className="bg-white/90 backdrop-blur p-1.5 rounded-lg shadow cursor-pointer"><Trash2 size={13} className="text-red-500" /></button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
