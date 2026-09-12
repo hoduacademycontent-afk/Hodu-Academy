@@ -30,6 +30,7 @@ import LifeAtHoduCarousel from '@/components/hodu/LifeAtHoduCarousel'
 import { parseMediaUrl } from '@/lib/homeCarousel'
 import { normalizeImageUrl } from '@/lib/imageUtils'
 import VideoWithAntigravity from '@/components/hodu/VideoWithAntigravity'
+import JoinFacultySection from '@/components/hodu/JoinFacultySection'
 
 export const dynamic = 'force-dynamic'
 
@@ -543,6 +544,8 @@ export default async function OfflinePage() {
         </div>
       </section>
 
+      {/* ─── Join Our Faculty / Careers Section ─── */}
+      <JoinFacultySection />
 
     </div>
   )

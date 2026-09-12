@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import {
   LayoutDashboard, BookOpen, Users, Trophy, Image, MessageSquare,
   Bell, FileText, Phone, Settings, LogOut, Menu, X, ChevronRight, Home, Newspaper,
-  Search, ExternalLink, ListTree, Building2, Globe,
+  Search, ExternalLink, ListTree, Building2, Globe, GraduationCap,
 } from 'lucide-react'
 
 const navGroups: { title: string; items: { label: string; href: string; icon: any; keywords?: string }[] }[] = [
@@ -43,6 +43,7 @@ const navGroups: { title: string; items: { label: string; href: string; icon: an
     title: 'CRM',
     items: [
       { label: 'Leads', href: '/admin/leads', icon: Phone, keywords: 'enquiry pipeline follow up contact student' },
+      { label: 'Faculty Applications', href: '/admin/faculty-applications', icon: GraduationCap, keywords: 'teacher faculty career hiring jobs resume offline online join team applicant' },
     ],
   },
   {

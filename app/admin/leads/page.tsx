@@ -418,8 +418,19 @@ export default function LeadsPage() {
 
                     {/* Target Exam & Class */}
                     <td className="px-4 py-3 text-xs">
-                      <p className="font-semibold text-[#1B2A44]">{l.target_exam ?? '—'}</p>
-                      {l.class_level && <p className="text-[11px] text-[#64748b]">{l.class_level}</p>}
+                      {l.target_exam?.toLowerCase().includes('faculty') ? (
+                        <div className="flex flex-col items-start gap-0.5">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded">
+                            👨‍🏫 Faculty Application
+                          </span>
+                          <span className="font-semibold text-[#1B2A44]">{l.class_level || 'Educator'}</span>
+                        </div>
+                      ) : (
+                        <>
+                          <p className="font-semibold text-[#1B2A44]">{l.target_exam ?? '—'}</p>
+                          {l.class_level && <p className="text-[11px] text-[#64748b]">{l.class_level}</p>}
+                        </>
+                      )}
                     </td>
 
                     {/* City & Source */}
