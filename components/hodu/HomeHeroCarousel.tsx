@@ -1,15 +1,9 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import dynamic from 'next/dynamic'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { CarouselSlide, parseMediaUrl } from '@/lib/homeCarousel'
 import { normalizeImageUrl } from '@/lib/imageUtils'
-
-const Antigravity = dynamic(() => import('@/components/ui/Antigravity'), {
-  ssr: false,
-  loading: () => null,
-})
 
 interface HomeHeroCarouselProps {
   ctaText?: string
@@ -127,20 +121,6 @@ export default function HomeHeroCarousel({
                       controls
                       className="w-full h-full object-cover absolute inset-0 bg-black"
                     />
-                  )}
-                  {isCurrent && (
-                    <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden">
-                      <Antigravity
-                        count={180}
-                        color="#FF85C0"
-                        particleShape="capsule"
-                        particleSize={1.5}
-                        magnetRadius={10}
-                        ringRadius={7}
-                        autoAnimate={true}
-                        fieldStrength={10}
-                      />
-                    </div>
                   )}
                 </>
               ) : s.linkUrl ? (
