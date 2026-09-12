@@ -164,7 +164,15 @@ export default function LeadsPage() {
   }
 
   async function updateStatus(id: string, status: string) {
-    await supabase.from('cms_leads').update({ status }).eq('id', id)
+    try {
+      await fetch('/api/enquiry', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status })
+      })
+    } catch (err) {
+      console.error('Error updating status:', err)
+    }
     load()
   }
 
@@ -177,13 +185,23 @@ export default function LeadsPage() {
   async function saveDetail() {
     if (!detail) return
     setSavingDetail(true)
-    await supabase.from('cms_leads').update({
-      notes,
-      follow_up_date: followUp || null,
-    }).eq('id', detail.id)
-    setSavingDetail(false)
-    setDetail(null)
-    load()
+    try {
+      await fetch('/api/enquiry', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: detail.id,
+          notes,
+          follow_up_date: followUp || null,
+        })
+      })
+    } catch (err) {
+      console.error('Error saving detail:', err)
+    } finally {
+      setSavingDetail(false)
+      setDetail(null)
+      load()
+    }
   }
 
   // Deletion functions

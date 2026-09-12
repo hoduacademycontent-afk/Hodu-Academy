@@ -100,6 +100,73 @@ export default function FacultyApplicationsPage() {
   const [deleteTarget, setDeleteTarget] = useState<{ type: 'single' | 'bulk'; app?: any; count?: number } | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
+  // Notification Email State
+  const [recipientEmail, setRecipientEmail] = useState('thehoduacademy@gmail.com')
+  const [tempEmail, setTempEmail] = useState('')
+  const [showEmailModal, setShowEmailModal] = useState(false)
+  const [emailStatus, setEmailStatus] = useState<{ loading: boolean; message: string; isError: boolean } | null>(null)
+
+  async function loadNotificationEmail() {
+    try {
+      const res = await fetch('/api/admin/notification-settings')
+      const data = await res.json()
+      if (data?.email) {
+        setRecipientEmail(data.email)
+        setTempEmail(data.email)
+      }
+    } catch {
+      // fallback
+    }
+  }
+
+  async function saveNotificationEmail() {
+    if (!tempEmail || !tempEmail.includes('@')) {
+      setEmailStatus({ loading: false, message: 'Please enter a valid email address.', isError: true })
+      return
+    }
+
+    setEmailStatus({ loading: true, message: 'Saving new recipient email…', isError: false })
+    try {
+      const res = await fetch('/api/admin/notification-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: tempEmail.trim() })
+      })
+      const data = await res.json()
+
+      if (!res.ok || data.error) {
+        setEmailStatus({ loading: false, message: data.error || 'Failed to save recipient email', isError: true })
+      } else {
+        setRecipientEmail(tempEmail.trim())
+        setEmailStatus({ loading: false, message: 'Recipient email updated successfully! All future enquiries & applications will go here.', isError: false })
+      }
+    } catch (err: any) {
+      setEmailStatus({ loading: false, message: err.message || 'Error updating email', isError: true })
+    }
+  }
+
+  async function sendTestEmailFromFaculty() {
+    const target = tempEmail || recipientEmail
+    setEmailStatus({ loading: true, message: `Sending verification test email to ${target}…`, isError: false })
+
+    try {
+      const res = await fetch('/api/admin/notification-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: target.trim(), action: 'test' })
+      })
+      const data = await res.json()
+
+      if (!res.ok || data.error) {
+        setEmailStatus({ loading: false, message: data.error || 'Failed to send test email', isError: true })
+      } else {
+        setEmailStatus({ loading: false, message: `Test email sent to ${target}! Check your inbox.`, isError: false })
+      }
+    } catch (err: any) {
+      setEmailStatus({ loading: false, message: err.message || 'Error sending test email', isError: true })
+    }
+  }
+
   async function loadApplications() {
     setLoading(true)
     try {
@@ -126,6 +193,7 @@ export default function FacultyApplicationsPage() {
 
   useEffect(() => {
     loadApplications()
+    loadNotificationEmail()
   }, [])
 
   // Filtered Applications
@@ -177,13 +245,23 @@ export default function FacultyApplicationsPage() {
       curr.map((a) => (a.id === id ? { ...a, status: newStatus } : a))
     )
 
-    const { error } = await supabase
-      .from('cms_leads')
-      .update({ status: newStatus })
-      .eq('id', id)
-
-    if (error) {
-      console.error('Failed to update status:', error)
+    try {
+      const res = await fetch('/api/faculty-apply', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status: newStatus })
+      })
+      const data = await res.json()
+      if (!res.ok || data.error) {
+        console.error('Failed to update status:', data.error)
+        setApplications(prev)
+      } else {
+        if (detailApp && detailApp.id === id) {
+          setDetailApp((curr: any) => ({ ...curr, status: newStatus }))
+        }
+      }
+    } catch (err) {
+      console.error('Failed to update status:', err)
       setApplications(prev)
     }
   }
@@ -199,17 +277,22 @@ export default function FacultyApplicationsPage() {
     if (!detailApp) return
     setSavingDetail(true)
     try {
-      const { error } = await supabase
-        .from('cms_leads')
-        .update({ notes: internalNotes })
-        .eq('id', detailApp.id)
-
-      if (!error) {
+      const res = await fetch('/api/faculty-apply', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: detailApp.id, notes: internalNotes })
+      })
+      const data = await res.json()
+      if (res.ok && data.success) {
         setApplications((curr) =>
           curr.map((a) => (a.id === detailApp.id ? { ...a, notes: internalNotes } : a))
         )
-        setDetailApp({ ...detailApp, notes: internalNotes })
+        setDetailApp((curr: any) => ({ ...curr, notes: internalNotes }))
+      } else {
+        alert(data.error || 'Failed to save notes')
       }
+    } catch (err: any) {
+      alert(err.message || 'Error saving notes')
     } finally {
       setSavingDetail(false)
     }
@@ -320,6 +403,20 @@ export default function FacultyApplicationsPage() {
           </div>
 
           <div className="flex items-center gap-2.5 flex-wrap">
+            <button
+              onClick={() => {
+                setTempEmail(recipientEmail)
+                setEmailStatus(null)
+                setShowEmailModal(true)
+              }}
+              className="flex items-center gap-1.5 border border-[#F3DCDC] hover:border-[#7E0D0D] text-[#1B2A44] text-xs font-semibold px-3.5 py-2.5 rounded-xl transition-colors bg-white shadow-xs cursor-pointer"
+              title="Change Faculty Application & Lead Notification Recipient Email"
+            >
+              <Mail size={14} className="text-[#7E0D0D]" />
+              <span className="hidden md:inline text-[#64748b]">Alerts:</span>
+              <span className="font-mono text-xs text-[#7E0D0D] font-bold truncate max-w-[170px]">{recipientEmail}</span>
+            </button>
+
             {selectedIds.length > 0 && (
               <button
                 type="button"
@@ -838,6 +935,70 @@ export default function FacultyApplicationsPage() {
                   className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-all shadow-xs disabled:opacity-50"
                 >
                   {isDeleting ? 'Deleting…' : 'Yes, Delete'}
+                </button>
+              </div>
+            </div>
+          </Modal>
+        )}
+
+        {/* Lead & Faculty Notification Settings Modal */}
+        {showEmailModal && (
+          <Modal title="Lead & Faculty Notification Settings" onClose={() => setShowEmailModal(false)}>
+            <div className="space-y-4">
+              <div className="bg-[#FDF5F5] border border-[#F3DCDC] rounded-xl p-4">
+                <p className="text-xs text-[#1B2A44] leading-relaxed">
+                  All admission enquiries, student consultation requests, and <strong>teacher/faculty applications</strong> will dispatch instant HTML alerts to this email address via <strong>Resend</strong>.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#1B2A44] mb-1">
+                  Recipient Email Address
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="email"
+                    value={tempEmail}
+                    onChange={(e) => setTempEmail(e.target.value)}
+                    placeholder="e.g. thehoduacademy@gmail.com"
+                    className="flex-1 border border-[#F3DCDC] rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-[#7E0D0D] text-[#1B2A44] font-medium"
+                  />
+                  <button
+                    type="button"
+                    onClick={sendTestEmailFromFaculty}
+                    disabled={emailStatus?.loading}
+                    className="flex items-center gap-1.5 bg-[#FDF5F5] hover:bg-[#7E0D0D] hover:text-white text-[#7E0D0D] border border-[#F3DCDC] text-xs font-bold px-3.5 py-2.5 rounded-xl transition-colors disabled:opacity-50 shrink-0 cursor-pointer"
+                  >
+                    <Send size={13} /> {emailStatus?.loading ? 'Sending…' : 'Send Test'}
+                  </button>
+                </div>
+                <p className="text-[11px] text-[#94a3b8] mt-1.5">
+                  Current Active: <span className="font-semibold text-[#7E0D0D]">{recipientEmail}</span>
+                </p>
+              </div>
+
+              {emailStatus && (
+                <div className={`flex items-start gap-2 p-3 rounded-xl text-xs border ${emailStatus.isError ? 'bg-red-50 text-red-700 border-red-200' : 'bg-green-50 text-green-800 border-green-200'}`}>
+                  {emailStatus.isError ? <AlertCircle size={15} className="shrink-0 mt-0.5 text-red-600" /> : <CheckCircle2 size={15} className="shrink-0 mt-0.5 text-green-600" />}
+                  <p>{emailStatus.message}</p>
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowEmailModal(false)}
+                  className="flex-1 border border-[#F3DCDC] text-[#1B2A44] py-2.5 rounded-xl text-sm font-semibold hover:bg-neutral-50 transition-colors cursor-pointer"
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  onClick={saveNotificationEmail}
+                  disabled={emailStatus?.loading}
+                  className="flex-1 bg-[#7E0D0D] text-white py-2.5 rounded-xl text-sm font-bold shadow-xs hover:bg-[#600a0a] transition-colors disabled:opacity-60 cursor-pointer"
+                >
+                  {emailStatus?.loading ? 'Saving…' : 'Save Recipient Email'}
                 </button>
               </div>
             </div>

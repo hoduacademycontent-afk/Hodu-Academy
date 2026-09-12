@@ -173,3 +173,45 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: err.message || 'Failed to delete application(s).' }, { status: 500 })
   }
 }
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const body = await req.json()
+    const { id, status, notes } = body
+
+    if (!id) {
+      return NextResponse.json({ error: 'Application ID is required.' }, { status: 400 })
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bgaidfuzvcrjbxmpfvym.supabase.co'
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+    const { createClient: createAdminClient } = await import('@supabase/supabase-js')
+    const supabase = createAdminClient(supabaseUrl, supabaseKey)
+
+    const updatePayload: Record<string, any> = {}
+    if (status !== undefined) updatePayload.status = status
+    if (notes !== undefined) updatePayload.notes = notes
+
+    const { data, error } = await supabase
+      .from('cms_leads')
+      .update(updatePayload)
+      .eq('id', id)
+      .select('*')
+      .single()
+
+    if (error) {
+      console.error('[Update Faculty Application Error]:', error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({
+      success: true,
+      application: data,
+      message: 'Faculty application updated successfully.'
+    })
+  } catch (err: any) {
+    console.error('[Update Faculty Application Exception]:', err)
+    return NextResponse.json({ error: err.message || 'Failed to update application.' }, { status: 500 })
+  }
+}
+
