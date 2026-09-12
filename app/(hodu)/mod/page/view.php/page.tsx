@@ -209,6 +209,14 @@ export default async function LegacyPageViewPage({
     redirect('/')
   }
 
+  // Fast direct routes for core extracted hubs
+  if (id === '265') redirect('/offline')
+  if (id === '12') redirect('/academics')
+  if (id === '13') redirect('/holistic-development')
+  if (id === '14') redirect('/extra-curricular')
+  if (id === '11') redirect('/contact')
+  if (id === '10') redirect('/about')
+
   const supabase = await createClient()
 
   // 1. Check cms_pages

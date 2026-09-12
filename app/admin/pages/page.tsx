@@ -20,6 +20,10 @@ function slugify(text: string) {
 
 const CATEGORIES = [
   'All',
+  'Offline & Campus',
+  'Academics',
+  'Holistic Development',
+  'Extra-Curricular',
   'JEE Main',
   'JEE Advanced',
   'NEET',

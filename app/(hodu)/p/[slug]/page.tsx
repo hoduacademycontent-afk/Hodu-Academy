@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import {
   Home,
   ChevronRight,
@@ -246,6 +246,11 @@ export default async function CustomPageViewPage({
   if (!slug) {
     notFound()
   }
+
+  if (slug === 'offline-programs') redirect('/offline')
+  if (slug === 'academics') redirect('/academics')
+  if (slug === 'holistic-development') redirect('/holistic-development')
+  if (slug === 'extra-curricular-activity' || slug === 'extra-curricular') redirect('/extra-curricular')
 
   const supabase = await createClient()
   const { data: page } = await supabase
