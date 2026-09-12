@@ -31,6 +31,7 @@ import { parseMediaUrl } from '@/lib/homeCarousel'
 import { normalizeImageUrl } from '@/lib/imageUtils'
 import VideoWithAntigravity from '@/components/hodu/VideoWithAntigravity'
 import JoinFacultySection from '@/components/hodu/JoinFacultySection'
+import InteractiveFacultyCard from '@/components/hodu/InteractiveFacultyCard'
 
 export const dynamic = 'force-dynamic'
 
@@ -431,53 +432,21 @@ export default async function OfflinePage() {
             </div>
           </ScrollReveal>
 
-          {/* ─── 1. Three Directors Spotlight (Clean & Simple Cards) ─── */}
+          {/* ─── 1. Three Directors Spotlight (Clean & Interactive Cards) ─── */}
           <div className="mb-14 sm:mb-20">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
               {activeDirectors.map((dir: any, idx: number) => (
-                <ScrollReveal key={dir.id || idx} animation="fade-up" delay={idx * 80}>
-                  <div className="bg-white border-2 border-brand-maroon rounded-2xl p-6 sm:p-7 text-center shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between items-center h-full group">
-                    <div className="w-full flex flex-col items-center">
-                      <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden mx-auto mb-4 bg-neutral-50 border border-neutral-100 flex items-center justify-center shrink-0 shadow-xs">
-                        {dir.photo_url ? (
-                          <img
-                            src={normalizeImageUrl(dir.photo_url)}
-                            alt={dir.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex flex-col items-center justify-center font-serif-editorial font-bold text-brand-maroon bg-brand-blush">
-                            <Crown size={24} className="text-brand-maroon mb-0.5 opacity-80" />
-                            <span className="text-[10px] font-sans tracking-widest font-bold">DIRECTOR</span>
-                          </div>
-                        )}
-                      </div>
-
-                      <h3 className="font-serif-editorial text-lg sm:text-xl font-bold text-brand-maroon">
-                        {dir.name}
-                      </h3>
-                      <p className="text-sm font-bold text-[#1B2A44] mt-1">
-                        {dir.qualification || dir.subject}
-                      </p>
-                      {dir.experience && (
-                        <p className="text-xs text-[#475569] font-semibold mt-1">
-                          {dir.experience}
-                        </p>
-                      )}
-                    </div>
-
-                    {dir.bio && (
-                      <p className="text-xs text-neutral-600 leading-relaxed mt-4 pt-3 border-t border-neutral-100 w-full text-left">
-                        {dir.bio}
-                      </p>
-                    )}
-                  </div>
+                <ScrollReveal key={dir.id || idx} animation="fade-up" delay={idx * 80} className="h-full">
+                  <InteractiveFacultyCard
+                    faculty={dir}
+                    isDirector={true}
+                  />
                 </ScrollReveal>
               ))}
             </div>
           </div>
 
-          {/* ─── 2. Classroom Faculty Mentors (Clean & Simple Cards) ─── */}
+          {/* ─── 2. Classroom Faculty Mentors (Clean & Interactive Cards) ─── */}
           {activeFacultyMembers.length > 0 && (
             <div>
               <div className="text-center mb-8 sm:mb-10">
@@ -489,42 +458,11 @@ export default async function OfflinePage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {activeFacultyMembers.map((f: any, idx: number) => (
-                  <ScrollReveal key={f.id || idx} animation="fade-up" delay={(idx % 6) * 60}>
-                    <div className="bg-white border-2 border-brand-maroon rounded-2xl p-6 text-center shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between items-center h-full group">
-                      <div className="w-full flex flex-col items-center">
-                        <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden mx-auto mb-3.5 bg-neutral-50 border border-neutral-100 flex items-center justify-center shrink-0 shadow-xs">
-                          {f.photo_url ? (
-                            <img
-                              src={normalizeImageUrl(f.photo_url)}
-                              alt={f.name}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center font-bold text-base text-brand-maroon bg-brand-blush">
-                              {f.name.slice(0, 2).toUpperCase()}
-                            </div>
-                          )}
-                        </div>
-
-                        <h4 className="font-serif-editorial text-base sm:text-lg font-bold text-brand-maroon">
-                          {f.name}
-                        </h4>
-                        <p className="text-xs sm:text-sm font-bold text-[#1B2A44] mt-0.5">
-                          {f.role || f.subject}
-                        </p>
-                        {f.experience && (
-                          <p className="text-[11px] font-semibold text-brand-crimson mt-0.5">
-                            {f.experience}
-                          </p>
-                        )}
-                      </div>
-
-                      {f.bio && (
-                        <p className="text-xs text-neutral-600 leading-relaxed mt-3 pt-2.5 border-t border-neutral-100 w-full text-left line-clamp-4">
-                          {f.bio}
-                        </p>
-                      )}
-                    </div>
+                  <ScrollReveal key={f.id || idx} animation="fade-up" delay={(idx % 6) * 60} className="h-full">
+                    <InteractiveFacultyCard
+                      faculty={f}
+                      isDirector={false}
+                    />
                   </ScrollReveal>
                 ))}
               </div>

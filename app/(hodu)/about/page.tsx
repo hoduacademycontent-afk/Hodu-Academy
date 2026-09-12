@@ -4,6 +4,7 @@ import { Phone, ArrowRight, Target, Eye, GraduationCap, Award } from 'lucide-rea
 import Link from 'next/link'
 import BannerElasticMesh from '@/components/ui/BannerElasticMesh'
 import { SITE_URL, getBreadcrumbSchema, getEducationalOrganizationSchema } from '@/lib/seo'
+import InteractiveFacultyCard from '@/components/hodu/InteractiveFacultyCard'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -209,48 +210,18 @@ export default async function AboutPage() {
             <div className="w-12 h-1 bg-[#921e1f] mx-auto mt-3 rounded-full" />
           </div>
 
-          {/* Compact, short width & length cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6 max-w-5xl mx-auto">
+          {/* Founders Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto">
             {founders.map((founder, idx) => (
-              <div
+              <InteractiveFacultyCard
                 key={founder.id || founder.name + idx}
-                className="bg-white rounded-2xl border border-neutral-200 hover:border-[#921e1f]/60 p-5 sm:p-6 text-center shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col items-center justify-between group hover:-translate-y-1"
-              >
-                <div className="flex flex-col items-center w-full">
-                  {/* Proportional, compact circular avatar */}
-                  <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden mx-auto bg-neutral-100 ring-4 ring-[#921e1f]/15 group-hover:ring-[#921e1f]/35 p-0.5 shadow-xs shrink-0 flex items-center justify-center transition-all">
-                    {founder.photo_url ? (
-                      <img
-                        src={founder.photo_url}
-                        alt={founder.name}
-                        className="w-full h-full object-cover object-top rounded-full"
-                      />
-                    ) : (
-                      <span className="text-2xl font-bold text-[#921e1f]">
-                        {founder.name.slice(0, 2).toUpperCase()}
-                      </span>
-                    )}
-                  </div>
-
-                  <h3 className="text-lg sm:text-xl font-bold text-neutral-900 group-hover:text-[#921e1f] transition-colors mt-3.5">
-                    {founder.name}
-                  </h3>
-                  
-                  <span className="inline-block px-3 py-0.5 rounded-full bg-[#921e1f]/10 text-[#921e1f] text-[11px] font-bold uppercase tracking-wider mt-1.5">
-                    {founder.qualification || founder.college || 'MNIT, JAIPUR'}
-                  </span>
-
-                  <span className="text-[11px] font-medium text-neutral-500 mt-1">
-                    {founder.experience || 'Educator & Director'}
-                  </span>
-                </div>
-
-                {founder.bio && (
-                  <p className="text-xs text-neutral-600 text-justify leading-relaxed mt-3.5 pt-3 border-t border-neutral-100 w-full">
-                    {founder.bio}
-                  </p>
-                )}
-              </div>
+                faculty={{
+                  ...founder,
+                  qualification: founder.qualification || founder.college || 'MNIT, JAIPUR',
+                  role: founder.role || 'Co-Founder & Director',
+                }}
+                isDirector={true}
+              />
             ))}
           </div>
 
@@ -276,43 +247,13 @@ export default async function AboutPage() {
           </div>
 
           {/* Compact 3-column grid with refined height & width */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {faculty.map((member, idx) => (
-              <div
+              <InteractiveFacultyCard
                 key={member.id || member.name + idx}
-                className="bg-white rounded-2xl border border-neutral-200 hover:border-[#921e1f]/60 p-5 sm:p-6 shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between group hover:-translate-y-1"
-              >
-                <div className="text-center flex flex-col items-center">
-                  {/* Proportional circular avatar */}
-                  <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden mx-auto bg-neutral-100 ring-4 ring-[#921e1f]/15 group-hover:ring-[#921e1f]/35 p-0.5 shadow-xs shrink-0 flex items-center justify-center transition-all">
-                    {member.photo_url ? (
-                      <img
-                        src={member.photo_url}
-                        alt={member.name}
-                        className="w-full h-full object-cover object-top rounded-full"
-                      />
-                    ) : (
-                      <span className="text-xl font-bold text-[#921e1f]">
-                        {member.name.slice(0, 2).toUpperCase()}
-                      </span>
-                    )}
-                  </div>
-
-                  <h4 className="text-base sm:text-lg font-bold text-neutral-900 group-hover:text-[#921e1f] transition-colors mt-3">
-                    {member.name}
-                  </h4>
-
-                  <span className="inline-block px-3 py-0.5 rounded-full bg-[#921e1f]/10 text-[#921e1f] text-[11px] font-semibold mt-1.5">
-                    {member.role || member.subject || 'Expert Faculty'}
-                  </span>
-                </div>
-
-                <div className="mt-3.5 pt-3 border-t border-neutral-100">
-                  <p className="text-xs text-neutral-600 text-justify leading-relaxed">
-                    {member.bio}
-                  </p>
-                </div>
-              </div>
+                faculty={member}
+                isDirector={false}
+              />
             ))}
           </div>
 
