@@ -1,10 +1,43 @@
 import { Resend } from 'resend'
 
-const resendApiKey = process.env.RESEND_API_KEY || ''
-const resend = new Resend(resendApiKey)
+const DEFAULT_FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'Hodu Academy <xyz@email.hoduacademy.com>'
+const FALLBACK_FROM_EMAIL = 'Hodu Academy <onboarding@resend.dev>'
+const DEFAULT_TO_EMAIL = process.env.RESEND_NOTIFICATION_EMAIL || 'thehoduacademy@gmail.com'
 
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'Hodu Academy <xyz@email.hoduacademy.com>'
-const TO_EMAIL = process.env.RESEND_NOTIFICATION_EMAIL || 'thehoduacademy@gmail.com'
+function getResendClient() {
+  const apiKey = process.env.RESEND_API_KEY || process.env.NEXT_PUBLIC_RESEND_API_KEY || ''
+  return new Resend(apiKey)
+}
+
+async function sendEmailWithFallback(params: {
+  to: string[]
+  subject: string
+  html: string
+}) {
+  const resend = getResendClient()
+  const primaryFrom = DEFAULT_FROM_EMAIL
+
+  // 1. Try sending with primary configured sender
+  let response = await resend.emails.send({
+    from: primaryFrom,
+    to: params.to,
+    subject: params.subject,
+    html: params.html,
+  })
+
+  // 2. If primary failed due to domain verification/sender rejection, retry with fallback sender
+  if (response.error) {
+    console.warn('[Resend Primary Sender Warning]:', response.error, 'Retrying with fallback sender...')
+    response = await resend.emails.send({
+      from: FALLBACK_FROM_EMAIL,
+      to: params.to,
+      subject: params.subject,
+      html: params.html,
+    })
+  }
+
+  return response
+}
 
 export interface EnquiryLeadData {
   name: string
@@ -41,7 +74,10 @@ export async function sendEnquiryEmailNotification(data: EnquiryLeadData, recipi
       }
     }
 
-    const finalToEmail = recipient || TO_EMAIL
+    const recipients = Array.from(new Set([
+      recipient || DEFAULT_TO_EMAIL,
+      'thehoduacademy@gmail.com'
+    ].filter(Boolean)))
 
     const rawPhone = data.phone.replace(/[^\d+]/g, '')
     const whatsappPhone = rawPhone.startsWith('+') ? rawPhone.replace('+', '') : `91${rawPhone.replace(/^0+/, '')}`
@@ -142,19 +178,18 @@ export async function sendEnquiryEmailNotification(data: EnquiryLeadData, recipi
 </html>
 `
 
-    const response = await resend.emails.send({
-      from: FROM_EMAIL,
-      to: [finalToEmail],
+    const response = await sendEmailWithFallback({
+      to: recipients,
       subject: `🎓 New Lead: ${data.name} (${data.target_exam || data.phone})`,
       html: htmlContent,
     })
 
     if (response.error) {
       console.error('[Resend Error]', response.error)
-      return { success: false, error: response.error, recipient: finalToEmail }
+      return { success: false, error: response.error, recipients }
     }
 
-    return { success: true, data: response.data, recipient: finalToEmail }
+    return { success: true, data: response.data, recipients }
   } catch (err) {
     console.error('[Resend Exception]', err)
     return { success: false, error: err }
@@ -199,7 +234,10 @@ export async function sendFacultyApplicationEmailNotification(data: FacultyAppli
       }
     }
 
-    const finalToEmail = recipient || TO_EMAIL
+    const recipients = Array.from(new Set([
+      recipient || DEFAULT_TO_EMAIL,
+      'thehoduacademy@gmail.com'
+    ].filter(Boolean)))
 
     const rawPhone = data.phone.replace(/[^\d+]/g, '')
     const whatsappPhone = rawPhone.startsWith('+') ? rawPhone.replace('+', '') : `91${rawPhone.replace(/^0+/, '')}`
@@ -284,10 +322,10 @@ export async function sendFacultyApplicationEmailNotification(data: FacultyAppli
         ` : ''}
         ${data.resume_link ? `
         <tr>
-          <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; color: #64748b;">Resume / Portfolio</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; color: #64748b;">Resume / CV Document</td>
           <td style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-weight: 600;">
             <a href="${data.resume_link.startsWith('http') ? data.resume_link : `https://${data.resume_link}`}" target="_blank" style="color: #7E0D0D; text-decoration: underline; font-weight: 700;">
-              🔗 View Resume / Portfolio
+              📄 Download / View Attached Resume
             </a>
           </td>
         </tr>
@@ -323,19 +361,18 @@ export async function sendFacultyApplicationEmailNotification(data: FacultyAppli
 </html>
 `
 
-    const response = await resend.emails.send({
-      from: FROM_EMAIL,
-      to: [finalToEmail],
+    const response = await sendEmailWithFallback({
+      to: recipients,
       subject: `👨‍🏫 Faculty Application: ${data.name} — ${data.subject} (${data.experience || 'Educator'})`,
       html: htmlContent,
     })
 
     if (response.error) {
       console.error('[Resend Faculty Application Error]', response.error)
-      return { success: false, error: response.error, recipient: finalToEmail }
+      return { success: false, error: response.error, recipients }
     }
 
-    return { success: true, data: response.data, recipient: finalToEmail }
+    return { success: true, data: response.data, recipients }
   } catch (err) {
     console.error('[Resend Faculty Application Exception]', err)
     return { success: false, error: err }
@@ -345,7 +382,7 @@ export async function sendFacultyApplicationEmailNotification(data: FacultyAppli
 export async function sendTestNotificationEmail(recipientEmail: string) {
   try {
     const timestamp = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'full', timeStyle: 'short' })
-    const targetEmail = recipientEmail.trim() || TO_EMAIL
+    const targetEmail = recipientEmail.trim() || DEFAULT_TO_EMAIL
 
     const htmlContent = `
 <!DOCTYPE html>
@@ -366,11 +403,11 @@ export async function sendTestNotificationEmail(recipientEmail: string) {
       </p>
       <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin: 16px 0;">
         <p style="margin: 0; font-size: 13px; color: #475569;"><strong>Configured Recipient:</strong> ${targetEmail}</p>
-        <p style="margin: 4px 0 0 0; font-size: 13px; color: #475569;"><strong>Verified Sender:</strong> ${FROM_EMAIL}</p>
+        <p style="margin: 4px 0 0 0; font-size: 13px; color: #475569;"><strong>Verified Sender:</strong> ${DEFAULT_FROM_EMAIL}</p>
         <p style="margin: 4px 0 0 0; font-size: 13px; color: #475569;"><strong>Dispatched At:</strong> ${timestamp} (IST)</p>
       </div>
       <p style="font-size: 13px; color: #64748b;">
-        All future admissions, quick callback enquiries, and contact page messages submitted on the website will be forwarded directly to this email address.
+        All future admissions, faculty applications, and student enquiries submitted on the website will be forwarded directly to this email address.
       </p>
     </div>
   </div>
@@ -378,8 +415,7 @@ export async function sendTestNotificationEmail(recipientEmail: string) {
 </html>
 `
 
-    const response = await resend.emails.send({
-      from: FROM_EMAIL,
+    const response = await sendEmailWithFallback({
       to: [targetEmail],
       subject: `✅ Test Notification: Hodu Academy Lead Email Delivery Verified`,
       html: htmlContent,
