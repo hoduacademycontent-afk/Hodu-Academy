@@ -31,7 +31,6 @@ import { parseMediaUrl } from '@/lib/homeCarousel'
 import { normalizeImageUrl } from '@/lib/imageUtils'
 import VideoWithAntigravity from '@/components/hodu/VideoWithAntigravity'
 import JoinFacultySection from '@/components/hodu/JoinFacultySection'
-import OfflineProgramsExplorer from '@/components/hodu/OfflineProgramsExplorer'
 
 export const dynamic = 'force-dynamic'
 
@@ -361,32 +360,8 @@ export default async function OfflinePage() {
         </div>
       </section>
 
-      {/* ─── Academic & Holistic Development Pillars Explorer ─── */}
-      <section className="py-16 sm:py-24 bg-brand-bg border-b border-brand-border/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollReveal animation="fade-up">
-            <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14 space-y-3">
-              <div className="inline-flex items-center gap-2 bg-brand-maroon/10 text-brand-maroon px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
-                <GraduationCap size={15} />
-                <span>Classroom & Beyond Curriculum</span>
-              </div>
-              <h2 className="font-serif-editorial text-3xl sm:text-4xl lg:text-5xl font-bold text-brand-maroon tracking-tight">
-                Academics, Holistic & Extra-Curricular Hub
-              </h2>
-              <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed max-w-2xl mx-auto">
-                Explore our comprehensive school curriculum aligned with CBSE, Cambridge IGCSE, and IB standards, complemented by cognitive life skills and athletic-creative tracks.
-              </p>
-            </div>
-          </ScrollReveal>
-
-          <ScrollReveal animation="fade-up" delay={80}>
-            <OfflineProgramsExplorer />
-          </ScrollReveal>
-        </div>
-      </section>
-
       {/* Why Choose Hodu Academy */}
-      <section className="py-16 sm:py-20 bg-white overflow-hidden">
+      <section className="py-16 sm:py-20 bg-brand-bg overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollReveal animation="fade-up">
             <div className="text-center mb-10 sm:mb-14">
