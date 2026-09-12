@@ -39,6 +39,8 @@ const CURRICULUM_OPTIONS = [
 ]
 
 const EXPERIENCE_OPTIONS = [
+  'Fresher (No Prior Experience)',
+  'Less than 1 Year',
   '1 - 3 Years',
   '3 - 5 Years',
   '5 - 8 Years',
@@ -59,7 +61,7 @@ export default function JoinFacultySection() {
     phone: '',
     subject: 'Mathematics (Pure & Applied)',
     curriculum: 'Cambridge (IGCSE / AS & A Levels)',
-    experience: '3 - 5 Years',
+    experience: 'Fresher (No Prior Experience)',
     teaching_mode: 'Offline Jaipur Campus (Rajat Path, Mansarovar)',
     qualification: '',
     resume_link: '',
@@ -249,7 +251,7 @@ export default function JoinFacultySection() {
                         phone: '',
                         subject: 'Mathematics (Pure & Applied)',
                         curriculum: 'Cambridge (IGCSE / AS & A Levels)',
-                        experience: '3 - 5 Years',
+                        experience: 'Fresher (No Prior Experience)',
                         teaching_mode: 'Offline Jaipur Campus (Rajat Path, Mansarovar)',
                         qualification: '',
                         resume_link: '',
